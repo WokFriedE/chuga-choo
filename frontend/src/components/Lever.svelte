@@ -70,5 +70,6 @@
   img {
     transform-origin: 50% 100%;
     transition: transform 0.1s;
+    width: 100px; 
   }
 </style>

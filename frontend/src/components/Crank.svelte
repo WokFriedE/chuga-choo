@@ -1,5 +1,6 @@
 <script>
   let handle, wrap, cog2;
+  let { val = $bindable() } = $props();
   function handleMousemove(event) {
     //rotate the wrap element based on the mouse position
     const rect = wrap.getBoundingClientRect();
@@ -7,6 +8,7 @@
     const centerY = rect.top + rect.height / 2;
     const angle = Math.atan2(event.clientY - centerY, event.clientX - centerX);
     let deg = angle * (180 / Math.PI);
+    val = deg;
     wrap.style.transform = `rotate(${deg + 90}deg)`;
     //rotate the cog2 element in the opposite direction
     cog2.style.transform = `rotate(${-deg}deg)`;
@@ -48,8 +50,8 @@
 <style>
   .wrap {
     position: relative;
-    width: 10em;
-    height: 10em;
+    width: 5em;
+    height: 5em;
   }
 
   img {
@@ -66,18 +68,18 @@
   }
   .aslo_wrap {
     position: relative;
-    width: 15em;
-    height: 15em;
+    width: 7em;
+    height: 7em;
   }
   .cog2 {
     position: absolute;
     top: 40%;
     left: 30%;
-    width: 15em;
+    width: 7em;
     z-index: -1;
   }
   .handle {
-    top: -5em;
+    top: -2.5em;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
