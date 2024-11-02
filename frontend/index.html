@@ -14,23 +14,26 @@
         position: absolute;
         left: 0;
         top: 0;
-        z-index: 1;
+        z-index: -2;
         width: 100vw;
         height: 100vh;
         object-fit: cover;
+        transform: scaleX(-1);
+
       }
       canvas {
         position: absolute;
         left: 0;
         top: 0;
-        z-index: 2;
+        z-index: -1;
         width: 100vw;
         height: 100vh;
         object-fit: cover;
+        transform: scaleX(-1);
       }
       #enableWebcamButton {
         position: absolute;
-        z-index: 3;
+        z-index: 0;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -40,6 +43,7 @@
       }
     </style>
     <script type="module">
+      import { store_val } from "./src/lib/datastore.js";
       import {
         GestureRecognizer,
         FilesetResolver,
@@ -50,7 +54,7 @@
       let webcamRunning = false;
       const videoHeight = window.innerHeight + "px";
       const videoWidth = window.innerWidth + "px";
-
+      window.gesture = null;
       const createGestureRecognizer = async () => {
         const vision = await FilesetResolver.forVisionTasks(
           "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
@@ -100,6 +104,10 @@
 
         if (results.landmarks) {
           for (const landmarks of results.landmarks) {
+            store_val.update((val) => {
+              val["landmarks"] = landmarks;
+              return val;
+            });
             drawingUtils.drawConnectors(
               landmarks,
               GestureRecognizer.HAND_CONNECTIONS,
@@ -112,6 +120,21 @@
               color: "#FF0000",
               lineWidth: 2,
             });
+          }
+        }
+        if (results.gestures) {
+          for (const gesture of results.gestures) {
+            const [category, score] = gesture;
+            // console.log(
+            //   `Category: ${category.categoryName}, Score: ${category.score}`
+            // );
+            if (parseFloat(category.score) > 0.5) {
+              // category.categoryName;
+              store_val.update((val) => {
+                val["gesture"] = category.categoryName;
+                return val;
+              });
+            }
           }
         }
         canvasCtx.restore();
