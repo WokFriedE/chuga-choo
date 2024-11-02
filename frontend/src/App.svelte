@@ -1,13 +1,13 @@
 <script>
   import { store_val } from "./lib/datastore.js";
-  import Lever from "./components/Lever.svelte";
+  import RoundLever from "./components/RoundLever.svelte";
 </script>
 
 <h1>
   {$store_val["gesture"]}
 </h1>
 <div>
-  <Lever />
+  <RoundLever />
 </div>
 
 <style>
