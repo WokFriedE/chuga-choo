@@ -7,8 +7,8 @@ class TrainInfo():
     J_per_kg_coal: float = 25
     
     air_fuel_ratio: float = 12 # 12:1 to 5:1 by weight
-    boiler_volume: float = 10 # m^3, 10-20
-    intake_pipe_radius: float = 0.1 # m
+    boiler_volume: float = 100 # m^3, 10-20
+    intake_pipe_radius: float = 0.15 # m
     
     boiler_efficiency: float = 0.8
     engine_efficiency: float = 0.2
@@ -19,9 +19,9 @@ class TrainInfo():
     len_boiler_to_engine: float = 1
     len_engine_to_cond: float = 1
     
-    rad_cond_to_boiler: float = 0.1
-    rad_boiler_to_engine: float = 0.1
-    rad_engine_to_cond: float = 0.2
+    rad_cond_to_boiler: float = 0.3
+    rad_boiler_to_engine: float = 0.3
+    rad_engine_to_cond: float = 0.6
     
     allowable_stress: float = 70 * 1e6 # MPa (140 for Wrought Iron, 200 for Stainless Steel)
     pipe_thickness: float = 0.001
@@ -73,16 +73,21 @@ class TrainSim():
     def fuel_used_kg(self):
         air_mass_flow = min(50, self.furnace_air_kg) # kg / s
         coal_mass_flow = air_mass_flow / self.train_data.air_fuel_ratio # kg / s
-        return min(coal_mass_flow*self.timestep, self.furnace_coal_kg)
+        return max(min(coal_mass_flow*self.timestep, self.furnace_coal_kg), 0)
     
     def step(self):
         if self.furnace_panel_open:
             self.furnace_air_kg = (self.train_data.boiler_volume - self.coal_volume) * 1.225
         else:
-            new_air = self.timestep * (self.speed_train / 3.6) * (np.pi * self.train_data.intake_pipe_radius ** 2) * 1.225
+            new_air = self.furnace_intake * self.timestep * (self.speed_train / 3.6) * (np.pi * self.train_data.intake_pipe_radius ** 2) * 1.225
             self.furnace_air_kg = min(self.furnace_air_kg + new_air, self.train_data.boiler_volume)
         # --- FURNACE ---
         fuel_used_kg = self.fuel_used_kg()
+        
+        if fuel_used_kg <= 0 and self.furnace_panel_open and self.kg_boiler_to_engine > 0:
+            # Backflow under no pressure
+            self.kg_boiler_to_engine = max(self.kg_boiler_to_engine - 50, 0)
+            
         self.furnace_coal_kg -= fuel_used_kg
         self.furnace_air_kg -= fuel_used_kg * self.train_data.air_fuel_ratio
         furnace_energy_MJ = self.train_data.boiler_efficiency * fuel_used_kg * 25 # 25 MJ / kg
@@ -90,7 +95,6 @@ class TrainSim():
         furnace_heat_loss_MJ = (1 - self.train_data.boiler_efficiency) * fuel_used_kg * 25
         self.temp_engine += 1e6 * furnace_heat_loss_MJ / self.train_data.heat_capacity
 
-        
         temp_diff = 100 - 60 # Assuming that Water is 60C after condenser- if we want more granularity change this
         water_boil_capacity_kg = furnace_energy_MJ / (0.004186 * temp_diff)
         water_boiled = min(self.kg_cond_to_boiler, water_boil_capacity_kg)
@@ -103,12 +107,13 @@ class TrainSim():
         speed_diff_ms = abs(self.speed_target - self.speed_train) / 3.6
         energy_diff_MJ = (self.train_data.train_mass * (speed_diff_ms ** 2)) / 1e6
         engine_energy_MJ = min(self.train_data.engine_efficiency * furnace_energy_MJ, energy_diff_MJ / self.train_data.engine_efficiency)
-        if speed_diff_ms < 0:
+        if self.speed_target < self.speed_train:
             engine_energy_MJ *= -1
-        friction_energy = 0.3 * (self.train_data.train_mass * 9.8) * self.speed_train * self.timestep
-        
-        dv = np.sign(engine_energy_MJ - friction_energy) * np.sqrt((2*abs(engine_energy_MJ - friction_energy)) / self.train_data.train_mass)
-        self.speed_train += dv
+        friction_energy = 0 #0.025 * (self.train_data.train_mass * 9.8) * self.speed_train * self.timestep
+        current_energy = (engine_energy_MJ*1e6) - friction_energy + 0.5 * self.train_data.train_mass * (self.speed_train / 3.6)**2
+        current_energy = max(current_energy, 0)
+        self.speed_train = 3.6 * np.sign(current_energy) * np.sqrt((2*abs(current_energy)) / self.train_data.train_mass)
+        #self.speed_train += dv
         
         steam_used_kg = engine_energy_MJ / (enthalpy_diff_MJ * self.train_data.engine_efficiency)
         self.kg_engine_to_cond += min(steam_used_kg, self.kg_boiler_to_engine)
@@ -118,7 +123,7 @@ class TrainSim():
         engine_energy_MJ *= self.train_data.engine_efficiency
         # Convective Heat Transfer: 50 W/m^2
         # Atmospheric Air Temp: 20C
-        self.temp_engine -= self.timestep * (np.pi * self.train_data.intake_pipe_radius ** 2) * (self.temp_engine - 20)
+        self.temp_engine -= self.engine_intake * self.timestep * 10 * (np.pi * self.train_data.intake_pipe_radius ** 2) * (self.temp_engine - 20)
         # --- CONDENSER ---
         self.kg_engine_to_cond -= min(self.train_data.exhaust_rate * self.exhaust_openness, self.kg_engine_to_cond)
         condenser_transfer = min(self.kg_engine_to_cond, self.train_data.condenser_rate * self.timestep)
@@ -141,14 +146,15 @@ class TrainSim():
             'Cond-Boiler Pipe Burst': pressure_cond_to_boiler > self.train_data.allowable_stress,
             'Boiler-Engine Pipe Burst': pressure_boiler_to_engine > self.train_data.allowable_stress,
             'Engine-Cond Pipe Burst': pressure_engine_to_cond > self.train_data.allowable_stress,
-            'Engine Overheating': self.temp_engine > 215,
-            'Engine Exploded': self.temp_engine > 250,
+            'Engine Overheating': self.temp_engine > 250,
+            'Engine Exploded': self.temp_engine > 300,
             
             'Engine Temperature': self.temp_engine,
             'Cond-Boiler Pressure': pressure_cond_to_boiler,
             'Boiler-Engine Pressure': pressure_boiler_to_engine,
             'Engine-Cond Pressure': pressure_engine_to_cond,
-            'Speed': self.speed_train
+            'Speed': self.speed_train,
+            'Fuel Weight': self.furnace_coal_kg
         }
         
     def actions(self, action_dict: dict):
@@ -177,5 +183,8 @@ class TrainSim():
                 self.speed_target = 0
             elif gear == -1:
                 self.speed_target = -30
+                
+        self.engine_intake = action_dict.get('engine_intake', 1)
+        self.furnace_intake = action_dict.get('furnace_intake', 1)
         
         
