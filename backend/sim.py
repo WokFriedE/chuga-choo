@@ -23,14 +23,16 @@ class TrainInfo():
     rad_boiler_to_engine: float = 0.1
     rad_engine_to_cond: float = 0.2
     
+    allowable_stress: float = 70 # MPa (140 for Wrought Iron, 200 for Stainless Steel)
+    pipe_thickness: float = 0.001
+    
     # 6000 Tons
     train_mass = 6000 * 907.2
     
     @property
     def heat_capacity(self):
         # Joule / Celsius
-        return 460 * self.engine_mass_kg
-    
+        return 460 * self.engine_mass_kg   
 
 
 class TrainSim():
@@ -71,6 +73,11 @@ class TrainSim():
         # --- FURNACE ---
         fuel_used_kg = self.fuel_used_kg()
         furnace_energy_MJ = self.train_data.boiler_efficiency * fuel_used_kg * 25 # 25 MJ / kg
+        
+        furnace_heat_loss_MJ = (1 - self.train_data.boiler_efficiency) * fuel_used_kg * 25
+        self.temp_engine += 1e6 * furnace_heat_loss_MJ / self.train_data.heat_capacity
+
+        
         temp_diff = 100 - 60 # Assuming that Water is 60C after condenser- if we want more granularity change this
         water_boil_capacity_kg = furnace_energy_MJ / (0.004186 * temp_diff)
         water_boiled = min(self.kg_cond_to_boiler, water_boil_capacity_kg)
@@ -82,21 +89,42 @@ class TrainSim():
         enthalpy_diff_MJ = 800000 / 1e6
         speed_diff_ms = abs(self.speed_target - self.speed_train) / 3.6
         energy_diff_MJ = (self.train_data.train_mass * (speed_diff_ms ** 2)) / 1e6
-        engine_energy = min(self.train_data.engine_efficiency * furnace_energy_MJ, energy_diff_MJ / self.train_data.engine_efficiency)
+        engine_energy_MJ = min(self.train_data.engine_efficiency * furnace_energy_MJ, energy_diff_MJ / self.train_data.engine_efficiency)
         
-        steam_used_kg = engine_energy / (enthalpy_diff_MJ * self.train_data.engine_efficiency)
-        self.kg_boiler_to_engine -= steam_used_kg
+        dv = np.sqrt(engine_energy_MJ / self.train_data.train_mass)
+        if speed_diff_ms > 0:
+            self.speed_train += dv
+        else:
+            self.speed_train -= dv
+        
+        steam_used_kg = engine_energy_MJ / (enthalpy_diff_MJ * self.train_data.engine_efficiency)
+        self.kg_boiler_to_engine = max(self.kg_boiler_to_engine - steam_used_kg, 0)
         self.kg_engine_to_cond += steam_used_kg
-        self.temp_engine += self.train_data.engine_heat_loss * engine_energy / self.train_data.heat_capacity
-        engine_energy *= self.train_data.engine_efficiency
+        self.temp_engine += 1e6 * self.train_data.engine_heat_loss * engine_energy_MJ / self.train_data.heat_capacity
+        engine_energy_MJ *= self.train_data.engine_efficiency
         # Convective Heat Transfer: 50 W/m^2
         # Atmospheric Air Temp: 20C
         self.temp_engine -= 50 * (np.pi * self.train_data.intake_pipe_radius ** 2) * (self.temp_engine - 20)
         # --- CONDENSER ---
         condenser_transfer = min(self.kg_engine_to_cond, self.train_data.condenser_rate * self.timestep)
-        self.kg_engine_to_cond -= condenser_transfer
+        self.kg_engine_to_cond = max(self.kg_engine_to_cond - condenser_transfer, 0)
         self.kg_cond_to_boiler += condenser_transfer        
         # --- METRICS ---
+        ideal_gas_const = 8.3145
+        steam_mol_kg = 55.5
+        water_mol_kg = 1
         
-            
+        vol_cond_to_boiler = (np.pi * (self.train_data.rad_cond_to_boiler ** 2)) * self.train_data.len_cond_to_boiler
+        vol_boiler_to_engine = (np.pi * (self.train_data.rad_boiler_to_engine ** 2)) * self.train_data.len_boiler_to_engine
+        vol_engine_to_cond = (np.pi * (self.train_data.rad_engine_to_cond ** 2)) * self.train_data.len_engine_to_cond
         
+        pressure_cond_to_boiler = (self.kg_cond_to_boiler * water_mol_kg) * ideal_gas_const * (60 + 273.15) / vol_cond_to_boiler
+        pressure_boiler_to_engine = (self.kg_boiler_to_engine * steam_mol_kg) * ideal_gas_const * (100 + 273.15) / vol_boiler_to_engine
+        pressure_engine_to_cond = (self.kg_engine_to_cond * steam_mol_kg) * ideal_gas_const * (100 + 273.15) / vol_engine_to_cond
+        
+        return {
+            'Cond-Boiler Pipe Burst': pressure_cond_to_boiler > self.train_data.allowable_stress,
+            'Boilder-Engine Pipe Burst': pressure_boiler_to_engine > self.train_data.allowable_stress,
+            'Engine-Cond Pipe Burst': pressure_engine_to_cond > self.train_data.allowable_stress,
+            'Engine Overheating': self.temp_engine > 215
+        }
