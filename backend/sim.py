@@ -23,7 +23,7 @@ class TrainInfo():
     rad_boiler_to_engine: float = 0.1
     rad_engine_to_cond: float = 0.2
     
-    allowable_stress: float = 70 # MPa (140 for Wrought Iron, 200 for Stainless Steel)
+    allowable_stress: float = 70 * 1e6 # MPa (140 for Wrought Iron, 200 for Stainless Steel)
     pipe_thickness: float = 0.001
     
     # 6000 Tons
@@ -52,12 +52,16 @@ class TrainSim():
     speed_train = 0
     speed_target = 0
     
-    furnace_lit = False
-    exhaust_open = False
+    exhaust_openness = 0
+    
+    furnace_intake = 1
+    engine_intake = 1
     
     def __init__(self, train_data: TrainInfo, timestep: float = 0.1):
         self.train_data: TrainInfo = train_data
         self.timestep = timestep
+        # Density of water is 1 kg / m^3
+        self.kg_cond_to_boiler = self.train_data.len_cond_to_boiler * (np.pi * (self.train_data.rad_cond_to_boiler ** 2))
     
     @property
     def coal_volume(self):
@@ -67,9 +71,7 @@ class TrainSim():
         return self.furnace_air_kg / 1.225
     
     def fuel_used_kg(self):
-        if not self.furnace_lit:
-            return 0
-        air_mass_flow = 50 # kg / s
+        air_mass_flow = min(50, self.furnace_air_kg) # kg / s
         coal_mass_flow = air_mass_flow / self.train_data.air_fuel_ratio # kg / s
         return min(coal_mass_flow*self.timestep, self.furnace_coal_kg)
     
@@ -79,8 +81,6 @@ class TrainSim():
         else:
             new_air = self.timestep * (self.speed_train / 3.6) * (np.pi * self.train_data.intake_pipe_radius ** 2) * 1.225
             self.furnace_air_kg = min(self.furnace_air_kg + new_air, self.train_data.boiler_volume)
-        if self.furnace_coal_kg == 0:
-            self.furnace_lit = False
         # --- FURNACE ---
         fuel_used_kg = self.fuel_used_kg()
         self.furnace_coal_kg -= fuel_used_kg
@@ -103,27 +103,27 @@ class TrainSim():
         speed_diff_ms = abs(self.speed_target - self.speed_train) / 3.6
         energy_diff_MJ = (self.train_data.train_mass * (speed_diff_ms ** 2)) / 1e6
         engine_energy_MJ = min(self.train_data.engine_efficiency * furnace_energy_MJ, energy_diff_MJ / self.train_data.engine_efficiency)
-        
-        engine_energy_MJ = -engine_energy_MJ if speed_diff_ms < 0 else energy_diff_MJ
+        if speed_diff_ms < 0:
+            engine_energy_MJ *= -1
         friction_energy = 0.3 * (self.train_data.train_mass * 9.8) * self.speed_train * self.timestep
         
         dv = np.sign(engine_energy_MJ - friction_energy) * np.sqrt((2*abs(engine_energy_MJ - friction_energy)) / self.train_data.train_mass)
         self.speed_train += dv
         
         steam_used_kg = engine_energy_MJ / (enthalpy_diff_MJ * self.train_data.engine_efficiency)
+        self.kg_engine_to_cond += min(steam_used_kg, self.kg_boiler_to_engine)
         self.kg_boiler_to_engine = max(self.kg_boiler_to_engine - steam_used_kg, 0)
-        self.kg_engine_to_cond += steam_used_kg
+        
         self.temp_engine += 1e6 * self.train_data.engine_heat_loss * engine_energy_MJ / self.train_data.heat_capacity
         engine_energy_MJ *= self.train_data.engine_efficiency
         # Convective Heat Transfer: 50 W/m^2
         # Atmospheric Air Temp: 20C
-        self.temp_engine -= 50 * (np.pi * self.train_data.intake_pipe_radius ** 2) * (self.temp_engine - 20)
+        self.temp_engine -= self.timestep * (np.pi * self.train_data.intake_pipe_radius ** 2) * (self.temp_engine - 20)
         # --- CONDENSER ---
-        if self.exhaust_open:
-            self.kg_engine_to_cond -= self.train_data.exhaust_rate
+        self.kg_engine_to_cond -= min(self.train_data.exhaust_rate * self.exhaust_openness, self.kg_engine_to_cond)
         condenser_transfer = min(self.kg_engine_to_cond, self.train_data.condenser_rate * self.timestep)
         self.kg_engine_to_cond = max(self.kg_engine_to_cond - condenser_transfer, 0)
-        self.kg_cond_to_boiler += condenser_transfer        
+        self.kg_cond_to_boiler += condenser_transfer * 2.26   
         # --- METRICS ---
         ideal_gas_const = 8.3145
         steam_mol_kg = 55.5
@@ -151,8 +151,31 @@ class TrainSim():
             'Speed': self.speed_train
         }
         
-    def actions(self):
-        return [
-            'Coal',
-            
-        ]
+    def actions(self, action_dict: dict):
+        self.furnace_panel_open = action_dict.get('panel_open', False)
+        if 'add_coal' in action_dict and self.furnace_panel_open:
+            self.furnace_coal_kg += float(action_dict['add_coal'])
+        if action_dict.get('dump_coal', False):
+            self.furnace_coal_kg = 0
+        
+        self.kg_cond_to_boiler += float(action_dict.get('add_water', 0)) - float(action_dict.get('drain_water', 0))
+        self.exhaust_open = bool(action_dict.get('exhaust_openness', 0))
+        
+        if 'gear' in action_dict:
+            gear = int(action_dict['gear'])
+            if gear == 5:
+                self.speed_target = 150
+            elif gear == 4:
+                self.speed_target = 120
+            elif gear == 3:
+                self.speed_target = 90
+            elif gear == 2:
+                self.speed_target = 60
+            elif gear == 1:
+                self.speed_target = 30
+            elif gear == 0:
+                self.speed_target = 0
+            elif gear == -1:
+                self.speed_target = -30
+        
+        
