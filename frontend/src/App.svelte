@@ -19,7 +19,7 @@
 <!-- <Lever /> -->
 <!-- </div> -->
 
-<!-- <Dial size={350} bind:number={dialNumber} max={100} /> -->
+<Dial size={350} bind:number={dialNumber} max={100} />
 
 <style>
   div {

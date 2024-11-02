@@ -7,6 +7,13 @@
   });
   let tickmarks = size > 100 ? 100 : 50;
   let dial_marks = new Array(tickmarks).fill(0).map((_, i) => i);
+  let audio = new Audio("/click.mp3");
+  audio.playbackRate = 2;
+
+  $effect(() => {
+    audio.play();
+    number;
+  });
 </script>
 
 <div
