@@ -29,6 +29,8 @@ class TrainInfo():
     # 6000 Tons
     train_mass = 6000 * 907.2
     
+    exhaust_rate: float = 10 # kg / s
+    
     @property
     def heat_capacity(self):
         # Joule / Celsius
@@ -50,6 +52,9 @@ class TrainSim():
     speed_train = 0
     speed_target = 0
     
+    furnace_lit = False
+    exhaust_open = False
+    
     def __init__(self, train_data: TrainInfo, timestep: float = 0.1):
         self.train_data: TrainInfo = train_data
         self.timestep = timestep
@@ -62,6 +67,8 @@ class TrainSim():
         return self.furnace_air_kg / 1.225
     
     def fuel_used_kg(self):
+        if not self.furnace_lit:
+            return 0
         air_mass_flow = 50 # kg / s
         coal_mass_flow = air_mass_flow / self.train_data.air_fuel_ratio # kg / s
         return min(coal_mass_flow*self.timestep, self.furnace_coal_kg)
@@ -69,9 +76,15 @@ class TrainSim():
     def step(self):
         if self.furnace_panel_open:
             self.furnace_air_kg = (self.train_data.boiler_volume - self.coal_volume) * 1.225
-        
+        else:
+            new_air = self.timestep * (self.speed_train / 3.6) * (np.pi * self.train_data.intake_pipe_radius ** 2) * 1.225
+            self.furnace_air_kg = min(self.furnace_air_kg + new_air, self.train_data.boiler_volume)
+        if self.furnace_coal_kg == 0:
+            self.furnace_lit = False
         # --- FURNACE ---
         fuel_used_kg = self.fuel_used_kg()
+        self.furnace_coal_kg -= fuel_used_kg
+        self.furnace_air_kg -= fuel_used_kg * self.train_data.air_fuel_ratio
         furnace_energy_MJ = self.train_data.boiler_efficiency * fuel_used_kg * 25 # 25 MJ / kg
         
         furnace_heat_loss_MJ = (1 - self.train_data.boiler_efficiency) * fuel_used_kg * 25
@@ -91,11 +104,11 @@ class TrainSim():
         energy_diff_MJ = (self.train_data.train_mass * (speed_diff_ms ** 2)) / 1e6
         engine_energy_MJ = min(self.train_data.engine_efficiency * furnace_energy_MJ, energy_diff_MJ / self.train_data.engine_efficiency)
         
-        dv = np.sqrt(engine_energy_MJ / self.train_data.train_mass)
-        if speed_diff_ms > 0:
-            self.speed_train += dv
-        else:
-            self.speed_train -= dv
+        engine_energy_MJ = -engine_energy_MJ if speed_diff_ms < 0 else energy_diff_MJ
+        friction_energy = 0.3 * (self.train_data.train_mass * 9.8) * self.speed_train * self.timestep
+        
+        dv = np.sign(engine_energy_MJ - friction_energy) * np.sqrt((2*abs(engine_energy_MJ - friction_energy)) / self.train_data.train_mass)
+        self.speed_train += dv
         
         steam_used_kg = engine_energy_MJ / (enthalpy_diff_MJ * self.train_data.engine_efficiency)
         self.kg_boiler_to_engine = max(self.kg_boiler_to_engine - steam_used_kg, 0)
@@ -106,6 +119,8 @@ class TrainSim():
         # Atmospheric Air Temp: 20C
         self.temp_engine -= 50 * (np.pi * self.train_data.intake_pipe_radius ** 2) * (self.temp_engine - 20)
         # --- CONDENSER ---
+        if self.exhaust_open:
+            self.kg_engine_to_cond -= self.train_data.exhaust_rate
         condenser_transfer = min(self.kg_engine_to_cond, self.train_data.condenser_rate * self.timestep)
         self.kg_engine_to_cond = max(self.kg_engine_to_cond - condenser_transfer, 0)
         self.kg_cond_to_boiler += condenser_transfer        
@@ -124,7 +139,20 @@ class TrainSim():
         
         return {
             'Cond-Boiler Pipe Burst': pressure_cond_to_boiler > self.train_data.allowable_stress,
-            'Boilder-Engine Pipe Burst': pressure_boiler_to_engine > self.train_data.allowable_stress,
+            'Boiler-Engine Pipe Burst': pressure_boiler_to_engine > self.train_data.allowable_stress,
             'Engine-Cond Pipe Burst': pressure_engine_to_cond > self.train_data.allowable_stress,
-            'Engine Overheating': self.temp_engine > 215
+            'Engine Overheating': self.temp_engine > 215,
+            'Engine Exploded': self.temp_engine > 250,
+            
+            'Engine Temperature': self.temp_engine,
+            'Cond-Boiler Pressure': pressure_cond_to_boiler,
+            'Boiler-Engine Pressure': pressure_boiler_to_engine,
+            'Engine-Cond Pressure': pressure_engine_to_cond,
+            'Speed': self.speed_train
         }
+        
+    def actions(self):
+        return [
+            'Coal',
+            
+        ]
