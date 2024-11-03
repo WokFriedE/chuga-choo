@@ -10,6 +10,7 @@
   import LogDial from "./components/LogDial.svelte";
   import Gearbox from "./components/Gearbox.svelte";
   import Label from "./components/Label.svelte";
+  import Help from "./components/Help.svelte";
   // setInterval(() => {
   // dialNumber++;
   // if (dialNumber > 100) {
@@ -18,6 +19,13 @@
   // }, 100);
 
   let coalArr = $state(new Array(10));
+  //add a random chance of coal appearing every 10 seconds
+  setInterval(() => {
+    if (Math.random() > 0.15 && coalArr.length < 10) {
+      coalArr.push("");
+    }
+  }, 10000);
+
   let coalVals_height = $state(0);
   let coalVals_width = $state(0);
   let coalVals_x = $state(0);
@@ -28,7 +36,6 @@
   $effect(() => {
     dialNumber = CrankVal;
   });
-
   let simTemp = $state(20);
   // Cond-Boiler Pressure
   let simP1 = $state(0);
@@ -59,6 +66,28 @@
       ActObserve();
     }, 1000);
   }
+  $effect(() => {
+    if (simTemp > 700) {
+      // reset the game
+      simTemp = 20;
+      simCoal = 0;
+      simP1 = 0;
+      simP2 = 0;
+      simP3 = 0;
+      simSpeed = 0;
+      actAddCoal = 0;
+      actDumpCoal = false;
+      actPanelOpen = false;
+      actExhaustOpen = 0;
+      actGear = 0;
+      actEngineIntake = 0;
+      actFurnaceIntake = 0;
+      // get a new session id
+      StartGame().then(() => {
+        window.location.href = "/fail.gif";
+      });
+    }
+  });
   async function ActObserve() {
     var postHeaders = new Headers();
     postHeaders.append("Content-Type", "application/json");
@@ -99,6 +128,10 @@
   }
 
   StartGame();
+  // set a css variable globally
+  $effect(() => {
+    document.documentElement.style.setProperty("--shake-speed", simSpeed);
+  });
 </script>
 
 <svelte:window
@@ -136,6 +169,9 @@
     }}
     size="350"
   />
+  <div class="poslable_1">
+    <Label label="Emergency Dump" />
+  </div>
 </div>
 <div class="cord">
   <PullCord size="200" bind:val={actExhaustOpen} />
@@ -180,6 +216,12 @@
   bind:y={coalVals_y}
   bind:hasGlass={actPanelOpen}
 />
+<div style="position: absolute; left: 250px; top: 800px">
+  <Label label="Furnace" />
+</div>
+<div class="help">
+  <Help />
+</div>
 
 <!-- <div class="light1">
   <Light />
@@ -189,6 +231,16 @@
 </div> -->
 
 <style>
+  .poslable_1 {
+    position: absolute;
+    top: 8em;
+    left: -5em;
+  }
+  .help {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+  }
   /* div {  
     display: flex;
     justify-content: center;
@@ -232,7 +284,8 @@
     background-attachment: fixed;
     background-size: cover;
     background-repeat: no-repeat;
-    animation: verticalshake 2s infinite;
+    /* animation: verticalshake calc(var(--shake-speed) / 100s) infinite; */
+    animation: verticalshake 1s infinite linear;
   }
   @keyframes verticalshake {
     0% {
@@ -241,7 +294,7 @@
     }
     50% {
       background-position: 0px 2px;
-      transform: translate(0px, 2px);
+      transform: translate(0px, calc(var(--shake-speed) * 2px));
     }
     100% {
       background-position: 0px 0px;
