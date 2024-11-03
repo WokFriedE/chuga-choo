@@ -48,10 +48,11 @@
 
   let session_id = $state();
   async function StartGame() {
-
-    let startRes = await (await fetch("https://api.chuggachugga-choochoo.tech/start")).json();
-    console.log(startRes)
-    session_id = startRes['id']
+    let startRes = await (
+      await fetch("https://api.chuggachugga-choochoo.tech/start")
+    ).json();
+    console.log(startRes);
+    session_id = startRes["id"];
 
     setInterval(() => {
       ActObserve();
@@ -80,13 +81,17 @@
       }
     );
 
-    let statusUpdate = await (await fetch(`https://api.chuggachugga-choochoo.tech/status?id=${session_id}`)).json()
-    simTemp = statusUpdate['engine_temperature']
-    simCoal = statusUpdate['fuel_weight']
-    simP1 = statusUpdate['cond_boiler_pressure']
-    simP2 = statusUpdate['boiler_engine_pressure']
-    simP3 = statusUpdate['engine_cond_pressure']
-    simSpeed = statusUpdate['speed']
+    let statusUpdate = await (
+      await fetch(
+        `https://api.chuggachugga-choochoo.tech/status?id=${session_id}`
+      )
+    ).json();
+    simTemp = statusUpdate["engine_temperature"];
+    simCoal = statusUpdate["fuel_weight"];
+    simP1 = statusUpdate["cond_boiler_pressure"];
+    simP2 = statusUpdate["boiler_engine_pressure"];
+    simP3 = statusUpdate["engine_cond_pressure"];
+    simSpeed = statusUpdate["speed"];
 
     actAddCoal = 0;
     actDumpCoal = false;
@@ -95,6 +100,22 @@
   StartGame();
 </script>
 
+<svelte:window
+  on:click={() => {
+    let audio = new Audio("/bgsnd.mp3");
+    audio.play();
+    audio.volume = 0.4;
+    audio.loop = true;
+    // random chance every 100 seconds
+    setInterval(() => {
+      if (Math.random() > 0.25) {
+        let audio2 = new Audio("/honkhonk.mp3");
+        audio2.play();
+        audio2.volume = 0.7;
+      }
+    }, 10000);
+  }}
+/>
 <!-- <button>start</button> -->
 <div style="display: flex; flex-direction: column;">
   <div style="display: flex; flex-direction: row; align-items: center;">
