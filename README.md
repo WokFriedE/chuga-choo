@@ -1,4 +1,7 @@
 # chuga-choo
+
+![save](./frontend/public/us.gif)
+
 HackNJIT 2024
 
 | Location  |   Packages        |    Usage        | 
