@@ -14,6 +14,8 @@
   <img src="/helpbook.png" alt="Help" />
 </button>
 <div id="mypopover" popover={"auto"}>
+  <h1>Help Text</h1>
+  <h2>Click for for next image</h2>
   <div style="display: flex; flex-direction: row;">
     {#each helpImgs as img, i}
       {#if i === curImg}
@@ -29,6 +31,10 @@
 </div>
 
 <style>
+  #mypopover h1,
+  #mypopover h2 {
+    text-align: center;
+  }
   .next {
     position: absolute;
     width: 100%;
