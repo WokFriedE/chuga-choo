@@ -1,5 +1,6 @@
 <script>
   let {
+    CoalIndicator = $bindable(),
     hasGlass = $bindable(),
     width = $bindable(),
     height = $bindable(),
@@ -32,9 +33,20 @@
       <div class="fire"></div>
     </div>
   {/if}
+  <p class="coal_left">
+    {CoalIndicator}
+  </p>
 </button>
 
 <style>
+  .coal_left {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 2em;
+  }
   .square {
     background: url("/black-cast-iron-background.png");
     width: 40em;

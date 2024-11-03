@@ -24,7 +24,7 @@
     if (Math.random() > 0.15 && coalArr.length < 10) {
       coalArr.push("");
     }
-  }, 10000);
+  }, 5000);
 
   let coalVals_height = $state(0);
   let coalVals_width = $state(0);
@@ -132,6 +132,9 @@
   $effect(() => {
     document.documentElement.style.setProperty("--shake-speed", simSpeed);
   });
+  $effect(() => {
+    console.log(simCoal);
+  });
 </script>
 
 <svelte:window
@@ -199,6 +202,7 @@
   <Coal
     addCoal={() => {
       actAddCoal++;
+      console.log(actAddCoal);
     }}
     bind:actPanelOpen
     furnace_pos={{
@@ -215,6 +219,7 @@
   bind:x={coalVals_x}
   bind:y={coalVals_y}
   bind:hasGlass={actPanelOpen}
+  bind:CoalIndicator={simCoal}
 />
 <div style="position: absolute; left: 250px; top: 800px">
   <Label label="Furnace" />
