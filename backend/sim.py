@@ -29,7 +29,7 @@ class TrainInfo():
     # 6000 Tons
     train_mass = 6000 * 907.2
     
-    exhaust_rate: float = 10 # kg / s
+    exhaust_rate: float = 100 # kg / s
     
     @property
     def heat_capacity(self):
