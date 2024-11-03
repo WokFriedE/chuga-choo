@@ -32,7 +32,7 @@
       let r = Math.atan2(y, x);
       let deg = r * (180 / Math.PI) + 90;
       console.log(deg);
-      SpringStore.set(deg);
+      SpringStore.set(Math.min(Math.max(deg, 0), 180));
     }
 
     function closeDragElement() {
@@ -43,7 +43,7 @@
   }
   function close() {
     if ($SpringStore > 0) {
-      SpringStore.update((val) => val - 4);
+      SpringStore.update((val) => Math.max(val - 4, 0));
 
       setTimeout(close, 10);
     }
