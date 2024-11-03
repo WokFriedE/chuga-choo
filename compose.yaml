@@ -9,3 +9,9 @@ services:
             - "3000:80"
         depends_on:
             - backend
+    nginx: 
+        build: ./infra
+        ports:
+            - "80:80"
+        depends_on:
+            - web
