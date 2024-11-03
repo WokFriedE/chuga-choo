@@ -1,4 +1,5 @@
 <script>
+  import Coal from "./components/Coal.svelte";
   import Crank from "./components/Crank.svelte";
   import Dial from "./components/Dial.svelte";
   import Lever from "./components/Lever.svelte";
@@ -20,13 +21,16 @@
 
 <!-- <button>start</button> -->
 
-<Dial size={100} bind:number={dialNumber} max={100} />
+<Dial size={200} bind:number={dialNumber} max={100} />
 <div class="lvr">
-  <Lever />
+  <Lever size="200" />
 </div>
 <div class="crnk">
-  <Crank bind:val={CrankVal} />
+  <Crank size={"1.5"} bind:val={CrankVal} />
 </div>
+<Coal />
+<Coal />
+<Coal />
 
 <style>
   /* div {
