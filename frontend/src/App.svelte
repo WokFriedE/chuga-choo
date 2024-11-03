@@ -40,13 +40,13 @@
 <!-- <button>start</button> -->
 <div style="display: flex; flex-direction: column;">
   <div style="display: flex; flex-direction: row; align-items: center;">
-    <Dial size={200} bind:number={dialNumber} max={100} />
-    <Dial size={150} bind:number={dialNumber} max={100} />
+    <Dial size={200} bind:number={dialNumber} max={360} />
+    <Dial size={150} bind:number={dialNumber} max={360} />
   </div>
   <div style="display: flex; flex-direction: row;">
-    <LogDial size={75} bind:number={dialNumber} max={100} />
-    <LogDial size={75} bind:number={dialNumber} max={100} />
-    <LogDial size={75} bind:number={dialNumber} max={100} />
+    <LogDial size={75} bind:number={dialNumber} max={360} />
+    <LogDial size={75} bind:number={dialNumber} max={360} />
+    <LogDial size={75} bind:number={dialNumber} max={360} />
   </div>
 </div>
 <div class="lvr">
@@ -61,8 +61,8 @@
 <div class="crnk2">
   <Crank size={"1.5"} bind:val={CrankVal} />
 </div>
-<div>
-  <Gearbox size="350"></Gearbox>
+<div style="position: absolute; left:1300px; top:470px">
+  <Gearbox size="100" ></Gearbox>
 </div>
 <!-- <Coal bind:x={} /> -->
 {#each coalArr as coalpc}
@@ -112,12 +112,14 @@
     height: 50vh;
   } */
   .crnk1 {
-    margin: 3em;
+    position: absolute;
+    left: 40em;
+    top: 23em;
   }
   .crnk2 {
     position: absolute;
-    left: 80em;
-    top: 20em;
+    left: 60em;
+    top: 33em;
   }
   .cord {
     position: absolute;
