@@ -29,7 +29,7 @@ class TrainInfo():
     # 6000 Tons
     train_mass = 6000 * 907.2
     
-    exhaust_rate: float = 100 # kg / s
+    exhaust_rate: float = 0.3
     
     @property
     def heat_capacity(self):
@@ -128,7 +128,7 @@ class TrainSim():
         # Atmospheric Air Temp: 20C
         self.temp_engine -= self.engine_intake * self.timestep * 10 * (np.pi * self.train_data.intake_pipe_radius ** 2) * (self.temp_engine - 20)
         # --- CONDENSER ---
-        self.kg_engine_to_cond -= min(self.train_data.exhaust_rate * self.exhaust_openness, self.kg_engine_to_cond)
+        self.kg_engine_to_cond -= min(self.train_data.exhaust_rate * self.exhaust_openness * self.kg_engine_to_cond, self.kg_engine_to_cond)
         condenser_transfer = min(self.kg_engine_to_cond, self.train_data.condenser_rate * self.timestep)
         self.kg_engine_to_cond = max(self.kg_engine_to_cond - condenser_transfer, 0)
         self.kg_cond_to_boiler += condenser_transfer * 2.26   
