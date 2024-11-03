@@ -4,6 +4,7 @@
   import Dial from "./components/Dial.svelte";
   import BigBurny from "./components/BigBurny.svelte";
   import Lever from "./components/Lever.svelte";
+  import Light from "./components/Light.svelte";
   // setInterval(() => {
   // dialNumber++;
   // if (dialNumber > 100) {
@@ -77,6 +78,7 @@
   bind:x={coalVals_x}
   bind:y={coalVals_y}
 />
+<Light />
 
 <style>
   /* div {  
@@ -103,6 +105,20 @@
     background-attachment: fixed;
     background-size: cover;
     background-repeat: no-repeat;
-    
+    animation: verticalshake 2s infinite;
+  }
+  @keyframes verticalshake {
+    0% {
+      background-position: 0px 0px;
+      transform: translate(0px, 0px);
+    }
+    50% {
+      background-position: 0px 2px;
+      transform: translate(0px, 2px);
+    }
+    100% {
+      background-position: 0px 0px;
+      transform: translate(0px, 0px);
+    }
   }
 </style>
