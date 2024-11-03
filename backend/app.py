@@ -21,6 +21,17 @@ def run_simulation(id):
         logger.info(json.dumps({"id":id,"metrics":metrics}, indent=2))
         time.sleep(sim["train_sim"].timestep)  # Sleep for the timestep duration
 
+def check_for_timeout():
+    global simulations
+    while True:
+        logger.info("Checking for timeouts")
+        for x in simulations:
+            if time.time() - simulations[x]["last_update"] > 900:
+                logger.info(f"Timeout for {x}")
+                simulations[x]["running"] = False
+                simulations[x]["simulation"].join()
+        time.sleep(10)
+
 @app.route('/status', methods=['GET'])
 def get_status():
     """Endpoint to get the current simulation state."""
@@ -75,14 +86,17 @@ def stop_session():
     return jsonify({"message": "Session stopped"})
 
 
+timeout_thread = Thread(target=check_for_timeout)
+timeout_thread.start()
+
+
 if __name__ == '__main__':
     # Start the simulation in a separate thread
-    # simulation_thread = Thread(target=run_simulation)
-    # simulation_thread.start()
-    
+
     try:
         app.run(port=5000)  # Run the Flask app
     finally:
         for x in simulations:
             simulations[x]["running"] = False
             simulations[x]["simulation"].join()
+
