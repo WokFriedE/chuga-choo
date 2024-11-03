@@ -52,7 +52,7 @@
   let actFurnaceIntake = $state(0);
 
 
-  let session_id = null
+  let session_id = $state()
   async function StartGame() {
     session_id = await fetch("https://api.chuggachugga-choochoo.tech/start");
 
