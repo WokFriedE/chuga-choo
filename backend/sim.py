@@ -29,7 +29,7 @@ class TrainInfo():
     # 6000 Tons
     train_mass = 6000 * 907.2
     
-    exhaust_rate: float = 10 # kg / s
+    exhaust_rate: float = 0.3
     
     @property
     def heat_capacity(self):
@@ -57,11 +57,13 @@ class TrainSim():
     furnace_intake = 1
     engine_intake = 1
     
+    DISTANCE_TRAVELED = 0
+    
     def __init__(self, train_data: TrainInfo, timestep: float = 0.1):
         self.train_data: TrainInfo = train_data
         self.timestep = timestep
         # Density of water is 1 kg / m^3
-        self.kg_cond_to_boiler = self.train_data.len_cond_to_boiler * (np.pi * (self.train_data.rad_cond_to_boiler ** 2))
+        self.kg_cond_to_boiler = 50 #10000 * self.train_data.len_cond_to_boiler * (np.pi * (self.train_data.rad_cond_to_boiler ** 2))
     
     @property
     def coal_volume(self):
@@ -71,11 +73,12 @@ class TrainSim():
         return self.furnace_air_kg / 1.225
     
     def fuel_used_kg(self):
-        air_mass_flow = min(50, self.furnace_air_kg) # kg / s
+        air_mass_flow = min((self.train_data.boiler_volume - self.coal_volume) * 1.225, self.furnace_air_kg) # kg / s
         coal_mass_flow = air_mass_flow / self.train_data.air_fuel_ratio # kg / s
         return max(min(coal_mass_flow*self.timestep, self.furnace_coal_kg), 0)
     
     def step(self):
+        self.DISTANCE_TRAVELED += self.speed_train * self.timestep
         if self.furnace_panel_open:
             self.furnace_air_kg = (self.train_data.boiler_volume - self.coal_volume) * 1.225
         else:
@@ -125,7 +128,7 @@ class TrainSim():
         # Atmospheric Air Temp: 20C
         self.temp_engine -= self.engine_intake * self.timestep * 10 * (np.pi * self.train_data.intake_pipe_radius ** 2) * (self.temp_engine - 20)
         # --- CONDENSER ---
-        self.kg_engine_to_cond -= min(self.train_data.exhaust_rate * self.exhaust_openness, self.kg_engine_to_cond)
+        self.kg_engine_to_cond -= min(self.train_data.exhaust_rate * self.exhaust_openness * self.kg_engine_to_cond, self.kg_engine_to_cond)
         condenser_transfer = min(self.kg_engine_to_cond, self.train_data.condenser_rate * self.timestep)
         self.kg_engine_to_cond = max(self.kg_engine_to_cond - condenser_transfer, 0)
         self.kg_cond_to_boiler += condenser_transfer * 2.26   
@@ -154,7 +157,13 @@ class TrainSim():
             'boiler_engine_pressure': float(pressure_boiler_to_engine),
             'engine_cond_pressure': float(pressure_engine_to_cond),
             'speed': float(self.speed_train),
-            'fuel_weight': float(self.furnace_coal_kg)
+            'speed_target':float(self.speed_target),
+            'fuel_weight': float(self.furnace_coal_kg),
+            
+            'coal_volume': float(self.coal_volume),
+            'air_volume': float(self.air_volume),
+            
+            'dist_traveled':float(self.DISTANCE_TRAVELED)
         }
         
     def actions(self, action_dict: dict):

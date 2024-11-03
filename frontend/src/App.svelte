@@ -9,19 +9,23 @@
   import Tv from "./components/TV.svelte";
   import LogDial from "./components/LogDial.svelte";
   import Gearbox from "./components/Gearbox.svelte";
+  import Label from "./components/Label.svelte";
+  import Help from "./components/Help.svelte";
   // setInterval(() => {
   // dialNumber++;
   // if (dialNumber > 100) {
   // dialNumber = 0;
   // }
   // }, 100);
-  let coalArr = $state([
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-  ]);
+
+  let coalArr = $state(new Array(10));
+  //add a random chance of coal appearing every 10 seconds
+  setInterval(() => {
+    if (Math.random() > 0.15) {
+      coalArr.push("");
+    }
+  }, 5000);
+
   let coalVals_height = $state(0);
   let coalVals_width = $state(0);
   let coalVals_x = $state(0);
@@ -32,82 +36,206 @@
   $effect(() => {
     dialNumber = CrankVal;
   });
-
-  let simTemp = $state(20)
+  let simTemp = $state(20);
   // Cond-Boiler Pressure
-  let simP1 = $state(0)
+  let simP1 = $state(0);
   // Boiler-Engine Pressure
-  let simP2 = $state(0)
+  let simP2 = $state(0);
   // Engine-Cond Pressure
-  let simP3 = $state(0)
-  let simSpeed = $state(0)
-  let simCoal = $state(0)
-  
-  let actAddCoal = $state(0)
-  let actDumpCoal = $state(false)
-  let actPanelOpen = $state(false)
-  let actExhaustOpen = $state(0)
-  let actGear = $state(0)
-  let actEngineIntake = $state(0)
-  let actFurnaceIntake = $state(0)
+  let simP3 = $state(0);
+  let simSpeed = $state(0);
+  let simCoal = $state(0);
 
+  let actAddCoal = $state(0);
+  let actDumpCoal = $state(false);
+  let actPanelOpen = $state(false);
+  let actExhaustOpen = $state(0);
+  let actGear = $state(5);
+  let actEngineIntake = $state(0);
+  let actFurnaceIntake = $state(0);
+  let simDistance = $state(0);
+
+  let session_id = $state();
   async function StartGame() {
-    let uuid = await fetch("https://chuggachugga-choochoo.tech/api/start");
+    let startRes = await (
+      await fetch("https://api.chuggachugga-choochoo.tech/start")
+    ).json();
+    console.log(startRes);
+    session_id = startRes["id"];
+
+    setInterval(() => {
+      ActObserve();
+    }, 1000);
   }
+
+  // simTemp > 500 then make the body have a red blinking border
+  $effect(() => {
+    if (simTemp > 500) {
+      document.documentElement.style.setProperty(
+        "--border-val",
+        "0px 0px 400px 100px red inset"
+      );
+    } else {
+      document.documentElement.style.setProperty(
+        "--border-val",
+        "0px 0px 300px 10px #000 inset"
+      );
+    }
+  });
+  async function ActObserve() {
+    var postHeaders = new Headers();
+    postHeaders.append("Content-Type", "application/json");
+    let actRes = await fetch(
+      `https://api.chuggachugga-choochoo.tech/actions?id=${session_id}`,
+      {
+        method: "POST",
+        headers: postHeaders,
+        body: JSON.stringify({
+          panel_open: actPanelOpen,
+          add_coal: actAddCoal,
+          dump_coal: actDumpCoal,
+          add_water: 0,
+          drain_water: 0,
+          exhaut_openness: actExhaustOpen,
+          gear: actGear,
+          engine_intake: actEngineIntake,
+          furnace_intake: actFurnaceIntake,
+        }),
+        redirect: "follow",
+      }
+    );
+
+    let statusUpdate = await (
+      await fetch(
+        `https://api.chuggachugga-choochoo.tech/status?id=${session_id}`
+      )
+    ).json();
+    simTemp = statusUpdate["engine_temperature"];
+    simCoal = statusUpdate["fuel_weight"];
+    simP1 = statusUpdate["cond_boiler_pressure"];
+    simP2 = statusUpdate["boiler_engine_pressure"];
+    simP3 = statusUpdate["engine_cond_pressure"];
+    simSpeed = statusUpdate["speed"];
+    simDistance = statusUpdate["dist_traveled"];
+
+    actAddCoal = 0;
+    actDumpCoal = false;
+  }
+
+  StartGame();
+  // set a css variable globally
+  $effect(() => {
+    document.documentElement.style.setProperty("--shake-speed", simSpeed);
+  });
+  $effect(() => {
+    console.log(simCoal);
+  });
+  function reset() {
+    simTemp = 20;
+    simP1 = 0;
+    simP2 = 0;
+    simP3 = 0;
+    simSpeed = 0;
+    simCoal = 0;
+    actAddCoal = 0;
+    actDumpCoal = false;
+    actPanelOpen = false;
+    actExhaustOpen = 0;
+    actGear = 5;
+    actEngineIntake = 0;
+    actFurnaceIntake = 0;
+    simDistance = 0;
+  }
+  $effect(() => {
+    if (simTemp > 700) {
+      StartGame().then(() => {
+        reset();
+        window.location.href = "/fail.gif";
+      });
+    }
+    if (simP1 > 700000000 || simP2 > 700000000 || simP3 > 700000000) {
+      StartGame().then(() => {
+        reset();
+        window.location.href = "/fail.gif";
+      });
+    }
+  });
 </script>
 
+<svelte:window
+  on:click|once={() => {
+    let audio = new Audio("/bgsnd.mp3");
+    audio.play();
+    audio.volume = 0.4;
+    audio.loop = true;
+    // random chance every 100 seconds
+    setInterval(() => {
+      if (Math.random() > 0.25) {
+        let audio2 = new Audio("/honkhonk.mp3");
+        audio2.play();
+        audio2.volume = 0.7;
+      }
+    }, 30000);
+  }}
+/>
 <!-- <button>start</button> -->
 <div style="display: flex; flex-direction: column;">
   <div style="display: flex; flex-direction: row; align-items: center;">
     <Dial size={200} bind:number={simSpeed} max={200} label="Speed" />
-    <Dial size={150} bind:number={simTemp} max={400} label="Temp."/>
+    <Dial size={150} bind:number={simTemp} max={400} label="Temp." />
   </div>
   <div style="display: flex; flex-direction: row;">
     <LogDial size={75} bind:number={simP1} max={70000000} label="Pressure 1" />
-    <LogDial size={75} bind:number={simP2} max={70000000} label="Pressure 2"/>
-    <LogDial size={75} bind:number={simP3} max={70000000} label="Pressure 3"/>
+    <LogDial size={75} bind:number={simP2} max={70000000} label="Pressure 2" />
+    <LogDial size={75} bind:number={simP3} max={70000000} label="Pressure 3" />
   </div>
 </div>
 <div class="lvr">
-  <Lever size="350" />
+  <Lever
+    onleverpulled={() => {
+      actDumpCoal = true;
+    }}
+    size="350"
+  />
+  <div class="poslable_1">
+    <Label label="Emergency Dump" />
+  </div>
 </div>
 <div class="cord">
-  <PullCord size="200" bind:val={actExhaustOpen}/>
+  <PullCord size="200" bind:val={actExhaustOpen} />
 </div>
 <div class="crnk1">
   <Crank size={"1.5"} bind:val={actEngineIntake} />
+  <br />
+  <br />
+  <br />
+  <Label label="Engine Intake" />
 </div>
 <div class="crnk2">
   <Crank size={"1.5"} bind:val={actFurnaceIntake} />
+  <br />
+  <br />
+  <br />
+  <Label label="Furnace Intake" />
 </div>
 <div style="position: absolute; left:1300px; top:470px">
-  <Gearbox size="100" ></Gearbox>
+  <Gearbox size="100" bind:val={actGear}></Gearbox>
 </div>
 <!-- <Coal bind:x={} /> -->
+
 {#each coalArr as coalpc}
   <Coal
-    onmouseup={() => {
-      for (let i = 0; i < coalArr.length; i++) {
-        //check if the coal is in the hole
-        //check for overlap
-        //if overlap, remove the coal from the array
-        //and add to the fire
-        let coal = coalArr[i];
-        // let hole = holeElm.getBoundingClientRect();
-        let tolerance = 10;
-        if (
-          coal.x > coalVals_x - tolerance &&
-          coal.x < coalVals_x + coalVals_width + tolerance &&
-          coal.y > coalVals_y - tolerance &&
-          coal.y < coalVals_y + coalVals_height + tolerance
-        ) {
-          coalArr.splice(i, 1);
-          // holeElm.appendChild(coal);
-        }
-      }
+    addCoal={() => {
+      actAddCoal = actAddCoal + 5;
+      console.log(actAddCoal);
     }}
-    bind:x={coalpc.x}
-    bind:y={coalpc.y}
+    bind:actPanelOpen
+    furnace_pos={{
+      x: coalVals_x,
+      y: coalVals_y,
+      width: coalVals_width,
+      height: coalVals_height,
+    }}
   />
 {/each}
 <BigBurny
@@ -115,7 +243,16 @@
   bind:height={coalVals_height}
   bind:x={coalVals_x}
   bind:y={coalVals_y}
+  bind:hasGlass={actPanelOpen}
+  bind:CoalIndicator={simCoal}
 />
+<div style="position: absolute; left: 250px; top: 800px">
+  <Label label="Furnace" />
+</div>
+<div class="help">
+  <Help />
+</div>
+
 <!-- <div class="light1">
   <Light />
 </div> -->
@@ -124,6 +261,16 @@
 </div> -->
 
 <style>
+  .poslable_1 {
+    position: absolute;
+    top: 8em;
+    left: -5em;
+  }
+  .help {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+  }
   /* div {  
     display: flex;
     justify-content: center;
@@ -167,19 +314,25 @@
     background-attachment: fixed;
     background-size: cover;
     background-repeat: no-repeat;
-    animation: verticalshake 2s infinite;
+    /* animation: verticalshake calc(var(--shake-speed) / 100s) infinite; */
+    animation: verticalshake 1s infinite linear;
+    min-height: 100vh;
+  }
+  :global(html) {
+    /* border: var(--border-val); */
+    box-shadow: var(--border-val);
   }
   @keyframes verticalshake {
     0% {
-      background-position: 0px 0px;
+      /* background-position: 0px 0px; */
       transform: translate(0px, 0px);
     }
     50% {
-      background-position: 0px -2px;
-      transform: translate(0px, -2px);
+      /* background-position: 0px 2px; */
+      transform: translate(0px, calc(var(--shake-speed) * 2px));
     }
     100% {
-      background-position: 0px 0px;
+      /* background-position: 0px 0px; */
       transform: translate(0px, 0px);
     }
   }

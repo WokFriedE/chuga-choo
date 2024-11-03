@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from threading import Thread
 import time
 from sim import TrainInfo, TrainSim
@@ -7,8 +8,9 @@ import json
 from loguru import logger
 
 app = Flask(__name__)
+CORS(app)
 
-# A variable to control the simulation loop
+# A variable to control the simulation loop 
 simulations = {} # {id: {"simulation": Thread, "last_update": time.time(), "running": True}}
 inc = 0
 
@@ -19,6 +21,7 @@ def run_simulation(id):
     while sim["running"]:
         metrics = sim["train_sim"].step()  # Perform a simulation step
         logger.info(json.dumps({"id":id,"metrics":metrics}, indent=2))
+        simulations[id]['metrics'] = metrics
         time.sleep(sim["train_sim"].timestep)  # Sleep for the timestep duration
 
 def check_for_timeout():
@@ -36,7 +39,7 @@ def check_for_timeout():
 def get_status():
     """Endpoint to get the current simulation state."""
     id = request.args.get('id')
-    return jsonify(simulations[id]["train_sim"].step())  # This will return the latest state
+    return jsonify(simulations[id]["metrics"])  # This will return the latest state
 
 @app.route('/actions', methods=['POST'])
 def perform_actions():
