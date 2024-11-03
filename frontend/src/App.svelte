@@ -48,15 +48,10 @@
 
   let session_id = $state();
   async function StartGame() {
-<<<<<<< HEAD
-    session_id = (await fetch("https://api.chuggachugga-choochoo.tech/start"))[
-      "id"
-    ];
-=======
+
     let startRes = await (await fetch("https://api.chuggachugga-choochoo.tech/start")).json();
     console.log(startRes)
     session_id = startRes['id']
->>>>>>> 9dfebd0b92e16995e41ccc1048b4f27fee74dcc6
 
     setInterval(() => {
       ActObserve();
@@ -83,19 +78,8 @@
         }),
         redirect: "follow",
       }
-<<<<<<< HEAD
     );
-    let statusUpdate = await fetch(
-      `https://api.chuggachugga-choochoo.tech/status?id=${session_id}`
-    );
-    simTemp = statusUpdate["engine_temperature"];
-    simCoal = statusUpdate["fuel_weight"];
-    simP1 = statusUpdate["cond_boiler_pressure"];
-    simP2 = statusUpdate["boiler_engine_pressure"];
-    simP3 = statusUpdate["engine_cond_pressure"];
-    simSpeed = statusUpdate["speed"];
-=======
-    )
+
     let statusUpdate = await (await fetch(`https://api.chuggachugga-choochoo.tech/status?id=${session_id}`)).json()
     simTemp = statusUpdate['engine_temperature']
     simCoal = statusUpdate['fuel_weight']
@@ -103,7 +87,6 @@
     simP2 = statusUpdate['boiler_engine_pressure']
     simP3 = statusUpdate['engine_cond_pressure']
     simSpeed = statusUpdate['speed']
->>>>>>> 9dfebd0b92e16995e41ccc1048b4f27fee74dcc6
 
     actAddCoal = 0;
     actDumpCoal = false;
