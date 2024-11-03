@@ -21,7 +21,7 @@
   let coalArr = $state(new Array(10));
   //add a random chance of coal appearing every 10 seconds
   setInterval(() => {
-    if (Math.random() > 0.15 && coalArr.length < 10) {
+    if (Math.random() > 0.15) {
       coalArr.push("");
     }
   }, 5000);
@@ -66,28 +66,21 @@
       ActObserve();
     }, 1000);
   }
-  $effect(() => {
-    if (simTemp > 700) {
-      // reset the game
-      simTemp = 20;
-      simCoal = 0;
-      simP1 = 0;
-      simP2 = 0;
-      simP3 = 0;
-      simSpeed = 0;
-      actAddCoal = 0;
-      actDumpCoal = false;
-      actPanelOpen = false;
-      actExhaustOpen = 0;
-      actGear = 0;
-      actEngineIntake = 0;
-      actFurnaceIntake = 0;
-      // get a new session id
-      StartGame().then(() => {
-        window.location.href = "/fail.gif";
-      });
-    }
-  });
+
+  // simTemp > 500 then make the body have a red blinking border
+  // $effect(() => {
+  //   if (simTemp > 500) {
+  //     document.documentElement.style.setProperty(
+  //       "--border-val",
+  //       "0px 0px 10px 100px red inset"
+  //     );
+  //   } else {
+  //     document.documentElement.style.setProperty(
+  //       "--border-val",
+  //       "0px 0px 300px 10px #000 inset"
+  //     );
+  //   }
+  // });
   async function ActObserve() {
     var postHeaders = new Headers();
     postHeaders.append("Content-Type", "application/json");
@@ -201,7 +194,7 @@
 {#each coalArr as coalpc}
   <Coal
     addCoal={() => {
-      actAddCoal += 10;
+      actAddCoal = actAddCoal + 5;
       console.log(actAddCoal);
     }}
     bind:actPanelOpen
@@ -291,6 +284,11 @@
     background-repeat: no-repeat;
     /* animation: verticalshake calc(var(--shake-speed) / 100s) infinite; */
     animation: verticalshake 1s infinite linear;
+    min-height: 95vh;
+  }
+  :global(html) {
+    /* border: var(--border-val); */
+    box-shadow: var(--border-val);
   }
   @keyframes verticalshake {
     0% {
