@@ -54,7 +54,7 @@
 
   let session_id = $state()
   async function StartGame() {
-    session_id = await fetch("https://api.chuggachugga-choochoo.tech/start")['id'];
+    session_id = (await fetch("https://api.chuggachugga-choochoo.tech/start"))['id'];
 
     setInterval(() => {
       ActObserve();
