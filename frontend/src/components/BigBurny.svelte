@@ -34,7 +34,7 @@
     </div>
   {/if}
   <p class="coal_left">
-    {CoalIndicator}
+    {Math.floor(CoalIndicator)}
   </p>
 </button>
 

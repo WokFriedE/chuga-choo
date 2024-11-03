@@ -78,7 +78,7 @@ class TrainSim():
         return max(min(coal_mass_flow*self.timestep, self.furnace_coal_kg), 0)
     
     def step(self):
-        self.DISTANCE_TRAVELED += self.speed_train * self.timestep
+        self.DISTANCE_TRAVELED += (self.speed_train/3.6) * self.timestep
         if self.furnace_panel_open:
             self.furnace_air_kg = (self.train_data.boiler_volume - self.coal_volume) * 1.225
         else:

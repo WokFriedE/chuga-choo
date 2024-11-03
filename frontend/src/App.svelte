@@ -53,6 +53,7 @@
   let actGear = $state(5);
   let actEngineIntake = $state(0);
   let actFurnaceIntake = $state(0);
+  let simDistance = $state(0);
 
   let session_id = $state();
   async function StartGame() {
@@ -68,19 +69,19 @@
   }
 
   // simTemp > 500 then make the body have a red blinking border
-  // $effect(() => {
-  //   if (simTemp > 500) {
-  //     document.documentElement.style.setProperty(
-  //       "--border-val",
-  //       "0px 0px 10px 100px red inset"
-  //     );
-  //   } else {
-  //     document.documentElement.style.setProperty(
-  //       "--border-val",
-  //       "0px 0px 300px 10px #000 inset"
-  //     );
-  //   }
-  // });
+  $effect(() => {
+    if (simTemp > 500) {
+      document.documentElement.style.setProperty(
+        "--border-val",
+        "0px 0px 400px 100px red inset"
+      );
+    } else {
+      document.documentElement.style.setProperty(
+        "--border-val",
+        "0px 0px 300px 10px #000 inset"
+      );
+    }
+  });
   async function ActObserve() {
     var postHeaders = new Headers();
     postHeaders.append("Content-Type", "application/json");
@@ -115,6 +116,7 @@
     simP2 = statusUpdate["boiler_engine_pressure"];
     simP3 = statusUpdate["engine_cond_pressure"];
     simSpeed = statusUpdate["speed"];
+    simDistance = statusUpdate["dist_traveled"];
 
     actAddCoal = 0;
     actDumpCoal = false;
@@ -127,6 +129,36 @@
   });
   $effect(() => {
     console.log(simCoal);
+  });
+  function reset() {
+    simTemp = 20;
+    simP1 = 0;
+    simP2 = 0;
+    simP3 = 0;
+    simSpeed = 0;
+    simCoal = 0;
+    actAddCoal = 0;
+    actDumpCoal = false;
+    actPanelOpen = false;
+    actExhaustOpen = 0;
+    actGear = 5;
+    actEngineIntake = 0;
+    actFurnaceIntake = 0;
+    simDistance = 0;
+  }
+  $effect(() => {
+    if (simTemp > 700) {
+      StartGame().then(() => {
+        reset();
+        window.location.href = "/fail.gif";
+      });
+    }
+    if (simP1 > 700000000 || simP2 > 700000000 || simP3 > 700000000) {
+      StartGame().then(() => {
+        reset();
+        window.location.href = "/fail.gif";
+      });
+    }
   });
 </script>
 
@@ -284,7 +316,7 @@
     background-repeat: no-repeat;
     /* animation: verticalshake calc(var(--shake-speed) / 100s) infinite; */
     animation: verticalshake 1s infinite linear;
-    min-height: 95vh;
+    min-height: 100vh;
   }
   :global(html) {
     /* border: var(--border-val); */
@@ -292,15 +324,15 @@
   }
   @keyframes verticalshake {
     0% {
-      background-position: 0px 0px;
+      /* background-position: 0px 0px; */
       transform: translate(0px, 0px);
     }
     50% {
-      background-position: 0px 2px;
+      /* background-position: 0px 2px; */
       transform: translate(0px, calc(var(--shake-speed) * 2px));
     }
     100% {
-      background-position: 0px 0px;
+      /* background-position: 0px 0px; */
       transform: translate(0px, 0px);
     }
   }
