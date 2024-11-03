@@ -11,6 +11,7 @@
   import Gearbox from "./components/Gearbox.svelte";
   import Label from "./components/Label.svelte";
   import Help from "./components/Help.svelte";
+  import Progers from "./components/Progers.svelte";
   // setInterval(() => {
   // dialNumber++;
   // if (dialNumber > 100) {
@@ -238,6 +239,9 @@
     }}
   />
 {/each}
+<div class="prooggg">
+  <Progers bind:percent={simDistance} />
+</div>
 <BigBurny
   bind:width={coalVals_width}
   bind:height={coalVals_height}
@@ -261,6 +265,12 @@
 </div> -->
 
 <style>
+  .prooggg {
+    position: absolute;
+    top: 23em;
+    left: 15%;
+    transform: translate(-50%, 0);
+  }
   .poslable_1 {
     position: absolute;
     top: 8em;
@@ -313,7 +323,7 @@
     background-image: url("/bg.png");
     background-attachment: fixed;
     background-size: cover;
-    background-repeat: no-repeat;
+    /* background-repeat: no-repeat; */
     /* animation: verticalshake calc(var(--shake-speed) / 100s) infinite; */
     animation: verticalshake 1s infinite linear;
     min-height: 100vh;
@@ -324,15 +334,15 @@
   }
   @keyframes verticalshake {
     0% {
-      /* background-position: 0px 0px; */
+      background-position: 0px 0px;
       transform: translate(0px, 0px);
     }
     50% {
-      /* background-position: 0px 2px; */
+      background-position: 0px calc(var(--shake-speed) * 2px);
       transform: translate(0px, calc(var(--shake-speed) * 2px));
     }
     100% {
-      /* background-position: 0px 0px; */
+      background-position: 0px 0px;
       transform: translate(0px, 0px);
     }
   }
