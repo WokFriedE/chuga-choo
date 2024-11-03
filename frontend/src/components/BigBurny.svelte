@@ -1,6 +1,6 @@
 <script>
   let {
-    hasGlass = $bindable()
+    hasGlass = $bindable(),
     width = $bindable(),
     height = $bindable(),
     x = $bindable(),
