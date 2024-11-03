@@ -2,7 +2,7 @@
   import { spring } from "svelte/motion";
   import { writable } from "svelte/store";
 
-  let { size, val = $bindable() } = $props();
+  let { size, val = $bindable(5) } = $props();
   let lever;
   let activeTick = writable(0); // Use writable store for reactive state
 

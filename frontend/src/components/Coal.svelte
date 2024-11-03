@@ -34,7 +34,7 @@
         top > furnace_pos?.y &&
         top < furnace_pos?.y + furnace_pos?.height
       ) {
-        if (!actPanelOpen) {
+        if (!actPanelOpen && !hidden) {
           addCoal();
           // remove the coal from the screen
           hidden = true;

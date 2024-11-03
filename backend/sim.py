@@ -57,6 +57,8 @@ class TrainSim():
     furnace_intake = 1
     engine_intake = 1
     
+    DISTANCE_TRAVELED = 0
+    
     def __init__(self, train_data: TrainInfo, timestep: float = 0.1):
         self.train_data: TrainInfo = train_data
         self.timestep = timestep
@@ -71,11 +73,12 @@ class TrainSim():
         return self.furnace_air_kg / 1.225
     
     def fuel_used_kg(self):
-        air_mass_flow = min(50, self.furnace_air_kg) # kg / s
+        air_mass_flow = min(self.train_data.boiler_volume * 1.225, self.furnace_air_kg) # kg / s
         coal_mass_flow = air_mass_flow / self.train_data.air_fuel_ratio # kg / s
         return max(min(coal_mass_flow*self.timestep, self.furnace_coal_kg), 0)
     
     def step(self):
+        self.DISTANCE_TRAVELED += self.speed_train * self.timestep
         if self.furnace_panel_open:
             self.furnace_air_kg = (self.train_data.boiler_volume - self.coal_volume) * 1.225
         else:
@@ -155,7 +158,12 @@ class TrainSim():
             'engine_cond_pressure': float(pressure_engine_to_cond),
             'speed': float(self.speed_train),
             'speed_target':float(self.speed_target),
-            'fuel_weight': float(self.furnace_coal_kg)
+            'fuel_weight': float(self.furnace_coal_kg),
+            
+            'coal_volume': float(self.coal_volume),
+            'air_volume': float(self.air_volume),
+            
+            'dist_traveled':float(self.DISTANCE_TRAVELED)
         }
         
     def actions(self, action_dict: dict):
