@@ -1,6 +1,6 @@
 <script>
   let handle, wrap, cog2;
-  let { val = $bindable() } = $props();
+  let { val = $bindable(), size } = $props();
   function handleMousemove(event) {
     //rotate the wrap element based on the mouse position
     const rect = wrap.getBoundingClientRect();
@@ -26,7 +26,7 @@
   }
 </script>
 
-<div class="aslo_wrap">
+<div class="aslo_wrap" style:--size={size}>
   <div class="wrap" bind:this={wrap}>
     <img src="/cog.png" alt="cog" class="cog" draggable="false" />
     <img
@@ -50,8 +50,8 @@
 <style>
   .wrap {
     position: relative;
-    width: 5em;
-    height: 5em;
+    width: calc(var(--size) * 5em);
+    height: calc(var(--size) * 5em);
   }
 
   img {
@@ -68,18 +68,18 @@
   }
   .aslo_wrap {
     position: relative;
-    width: 7em;
-    height: 7em;
+    width: calc(var(--size) * 7em);
+    height: calc(var(--size) * 7em);
   }
   .cog2 {
     position: absolute;
     top: 40%;
     left: 30%;
-    width: 7em;
+    width: calc(var(--size) * 7em);
     z-index: -1;
   }
   .handle {
-    top: -2.5em;
+    top: calc(var(--size) * -2.5em);
     left: 50%;
     transform: translateX(-50%);
     width: 100%;

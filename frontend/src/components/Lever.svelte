@@ -1,10 +1,10 @@
 <script>
   import { spring } from "svelte/motion";
-
+  let { size } = $props();
   //make the lever draggable to rotate the lever
   let lever;
   let SpringStore = spring(0, {
-    stiffness: 0.05,
+    stiffness: 0.02,
     damping: 0.05,
   });
   function makeDraggable() {
@@ -25,13 +25,6 @@
     function elementDrag(e) {
       e = e || window.event;
       e.preventDefault();
-      // pos1 = pos3 - e.clientX;
-      // pos2 = pos4 - e.clientY;
-      // pos3 = e.clientX;
-      // pos4 = e.clientY;
-      // lever.style.top = lever.offsetTop - pos2 + "px";
-      // lever.style.left = lever.offsetLeft - pos1 + "px";
-      // rotate the lever
       let x =
         e.clientX - lever.getBoundingClientRect().left - lever.offsetWidth / 2;
       let y =
@@ -50,8 +43,7 @@
   }
   function close() {
     if ($SpringStore > 0) {
-      SpringStore.update((val) => val - 1);
-      console.log($SpringStore);
+      SpringStore.update((val) => val - 4);
 
       setTimeout(close, 10);
     }
@@ -59,6 +51,7 @@
 </script>
 
 <img
+  style:width={`${size}px`}
   src="/lever.png"
   alt="lever"
   style:transform={`rotate(${$SpringStore}deg)`}
@@ -70,6 +63,5 @@
   img {
     transform-origin: 50% 100%;
     transition: transform 0.1s;
-    width: 100px; 
   }
 </style>
