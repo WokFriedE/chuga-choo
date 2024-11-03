@@ -54,7 +54,7 @@
 
   let session_id = null
   async function StartGame() {
-    session_id = await fetch("https://chuggachugga-choochoo.tech/api/start");
+    session_id = await fetch("https://api.chuggachugga-choochoo.tech/start");
 
     setInterval(() => {
       ActObserve();
@@ -64,7 +64,7 @@
     var postHeaders = new Headers();
     postHeaders.append("Content-Type", "application/json");
     let actRes = await fetch(
-      `https://chuggachugga-choochoo.tech/api/actions?id=${session_id}`,
+      `https://api.chuggachugga-choochoo.tech/actions?id=${session_id}`,
       {
         method: 'POST',
         headers: postHeaders,
@@ -82,7 +82,7 @@
         redirect: 'follow'
       }
     )
-    let statusUpdate = await fetch(`https://chuggachugga-choochoo.tech/api/status?id=${session_id}`)
+    let statusUpdate = await fetch(`https://api.chuggachugga-choochoo.tech/status?id=${session_id}`)
     simTemp = statusUpdate['engine_temperature']
     simCoal = statusUpdate['fuel_weight']
     simP1 = statusUpdate['cond_boiler_pressure']
