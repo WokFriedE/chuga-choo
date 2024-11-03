@@ -1,26 +1,38 @@
 <script>
   let handle, wrap, cog2;
   let { val = $bindable(), size } = $props();
+
   function handleMousemove(event) {
-    //rotate the wrap element based on the mouse position
+    // Get the position of the wrap element and calculate the rotation angle
     const rect = wrap.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     const angle = Math.atan2(event.clientY - centerY, event.clientX - centerX);
     let deg = angle * (180 / Math.PI);
-    val = deg;
+
+    // Constrain the angle between -90 and +90 degrees
+    deg = Math.max(-90, Math.min(90, deg));
+
+    // Normalize the angle to a range from 0 (right) to 1 (left)
+    val = (90 - deg) / 180;
+
+    // Rotate the wrap element based on the angle
     wrap.style.transform = `rotate(${deg + 90}deg)`;
-    //rotate the cog2 element in the opposite direction
+
+    // Rotate the cog2 element in the opposite direction
     cog2.style.transform = `rotate(${-deg}deg)`;
   }
+
   function handleMouseup() {
     window.removeEventListener("mousemove", handleMousemove);
     window.removeEventListener("mouseup", handleMouseup);
   }
+
   function handleMousedown() {
     window.addEventListener("mousemove", handleMousemove);
     window.addEventListener("mouseup", handleMouseup);
   }
+
   function handleLoaded() {
     handle.addEventListener("mousedown", handleMousedown);
   }
