@@ -22,9 +22,9 @@
   bind:this={elmrect}
 >
   {#if hasGlass}
-    <div class="glass">
-      <div class="hole">
-        <div class="fire"></div>
+    <div class="glass dim">
+      <div class="hole dim">
+        <div class="fire dim"></div>
       </div>
     </div>
   {:else}
@@ -95,5 +95,39 @@
       opacity: 0.8;
       scale: 1.1;
     }
+  }
+  .fire.dim {
+    width: 4em;
+    height: 4em;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+  }
+  .glass.dim {
+    position: relative;
+  }
+  .glass.dim::before {
+    content: "";
+    width: 10em;
+    height: 10em;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(2px);
+    border: 3px solid #a45c30;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+  }
+  .hole.dim {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    background-color: #333;
   }
 </style>
