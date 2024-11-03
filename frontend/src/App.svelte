@@ -5,6 +5,7 @@
   import BigBurny from "./components/BigBurny.svelte";
   import Lever from "./components/Lever.svelte";
   import Light from "./components/Light.svelte";
+  import Tv from "./components/TV.svelte";
   // setInterval(() => {
   // dialNumber++;
   // if (dialNumber > 100) {
@@ -78,7 +79,12 @@
   bind:x={coalVals_x}
   bind:y={coalVals_y}
 />
-<Light />
+<div class="light1">
+  <Light />
+</div>
+<div class="tv">
+  <Tv />
+</div>
 
 <style>
   /* div {  
@@ -99,6 +105,18 @@
     position: absolute;
     top: 13em;
     left: 59em;
+  }
+  .tv {
+    position: absolute;
+    top: 35em;
+    left: 70em;
+    z-index: -1;
+  }
+  .light1 {
+    position: absolute;
+    top: 0em;
+    left:40em;
+    transform: rotate(180deg);
   }
   :global(body) {
     background-image: url("/bg.png");
