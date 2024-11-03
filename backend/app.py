@@ -5,7 +5,6 @@ from sim import TrainInfo, TrainSim
 import pprint
 import json
 from loguru import logger
-import uuid
 
 app = Flask(__name__)
 
@@ -43,7 +42,6 @@ def perform_actions():
 def start_session():
     """Start the session for a user"""
     global simulations, inc
-    # id = str(uuid.uuid4())
     id = str(inc)
 
     # Initialize your TrainInfo and TrainSim instances

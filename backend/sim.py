@@ -143,18 +143,18 @@ class TrainSim():
         pressure_engine_to_cond = (self.kg_engine_to_cond * steam_mol_kg) * ideal_gas_const * (100 + 273.15) / vol_engine_to_cond
         
         return {
-            'Cond-Boiler Pipe Burst': bool(pressure_cond_to_boiler > self.train_data.allowable_stress),
-            'Boiler-Engine Pipe Burst': bool(pressure_boiler_to_engine > self.train_data.allowable_stress),
-            'Engine-Cond Pipe Burst': bool(pressure_engine_to_cond > self.train_data.allowable_stress),
-            'Engine Overheating': bool(self.temp_engine > 250),
-            'Engine Exploded': bool(self.temp_engine > 300),
+            'cond_boiler_pipe_burst': bool(pressure_cond_to_boiler > self.train_data.allowable_stress),
+            'boiler_engine_pipe_burst': bool(pressure_boiler_to_engine > self.train_data.allowable_stress),
+            'engine_cond_pipe_burst': bool(pressure_engine_to_cond > self.train_data.allowable_stress),
+            'engine_overheating': bool(self.temp_engine > 250),
+            'engine_exploded': bool(self.temp_engine > 300),
             
-            'Engine Temperature': float(self.temp_engine),
-            'Cond-Boiler Pressure': float(pressure_cond_to_boiler),
-            'Boiler-Engine Pressure': float(pressure_boiler_to_engine),
-            'Engine-Cond Pressure': float(pressure_engine_to_cond),
-            'Speed': float(self.speed_train),
-            'Fuel Weight': float(self.furnace_coal_kg)
+            'engine_temperature': float(self.temp_engine),
+            'cond_boiler_pressure': float(pressure_cond_to_boiler),
+            'boiler_engine_pressure': float(pressure_boiler_to_engine),
+            'engine_cond_pressure': float(pressure_engine_to_cond),
+            'speed': float(self.speed_train),
+            'fuel_weight': float(self.furnace_coal_kg)
         }
         
     def actions(self, action_dict: dict):
