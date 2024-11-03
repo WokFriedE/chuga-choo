@@ -159,7 +159,7 @@ class TrainSim():
         
     def actions(self, action_dict: dict):
         self.furnace_panel_open = action_dict.get('panel_open', False)
-        if 'add_coal' in action_dict and self.furnace_panel_open:
+        if 'add_coal' in action_dict:
             self.furnace_coal_kg += float(action_dict['add_coal'])
         if action_dict.get('dump_coal', False):
             self.furnace_coal_kg = 0
@@ -184,7 +184,7 @@ class TrainSim():
             elif gear == -1:
                 self.speed_target = -30
                 
-        self.engine_intake = action_dict.get('engine_intake', 1)
-        self.furnace_intake = action_dict.get('furnace_intake', 1)
+        self.engine_intake = float(action_dict.get('engine_intake', 1))
+        self.furnace_intake = float(action_dict.get('furnace_intake', 1))
         
         
