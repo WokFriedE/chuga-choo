@@ -63,7 +63,7 @@ class TrainSim():
         self.train_data: TrainInfo = train_data
         self.timestep = timestep
         # Density of water is 1 kg / m^3
-        self.kg_cond_to_boiler = self.train_data.len_cond_to_boiler * (np.pi * (self.train_data.rad_cond_to_boiler ** 2))
+        self.kg_cond_to_boiler = 20000 * self.train_data.len_cond_to_boiler * (np.pi * (self.train_data.rad_cond_to_boiler ** 2))
     
     @property
     def coal_volume(self):
