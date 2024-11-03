@@ -19,6 +19,7 @@ def run_simulation(id):
     while sim["running"]:
         metrics = sim["train_sim"].step()  # Perform a simulation step
         logger.info(json.dumps({"id":id,"metrics":metrics}, indent=2))
+        simulations[id]['metrics'] = metrics
         time.sleep(sim["train_sim"].timestep)  # Sleep for the timestep duration
 
 def check_for_timeout():
@@ -36,7 +37,7 @@ def check_for_timeout():
 def get_status():
     """Endpoint to get the current simulation state."""
     id = request.args.get('id')
-    return jsonify(simulations[id]["train_sim"].step())  # This will return the latest state
+    return jsonify(simulations[id]["metrics"])  # This will return the latest state
 
 @app.route('/actions', methods=['POST'])
 def perform_actions():

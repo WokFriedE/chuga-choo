@@ -51,9 +51,50 @@
   let actEngineIntake = $state(0);
   let actFurnaceIntake = $state(0);
 
+
+  let session_id = null
   async function StartGame() {
-    let uuid = await fetch("https://api.chuggachugga-choochoo.tech/start");
+    session_id = await fetch("https://chuggachugga-choochoo.tech/api/start");
+
+    setInterval(() => {
+      ActObserve();
+    }, 250);
   }
+  async function ActObserve() {
+    var postHeaders = new Headers();
+    postHeaders.append("Content-Type", "application/json");
+    let actRes = await fetch(
+      `https://chuggachugga-choochoo.tech/api/actions?id=${session_id}`,
+      {
+        method: 'POST',
+        headers: postHeaders,
+        body: JSON.stringify({
+          'panel_open':actPanelOpen,
+          'add_coal': actAddCoal,
+          'dump_coal': actDumpCoal,
+          'add_water':0,
+          'drain_water':0,
+          'exhaut_openness':actExhaustOpen,
+          'gear':actGear,
+          'engine_intake':actEngineIntake,
+          'furnace_intake':actFurnaceIntake
+        }),
+        redirect: 'follow'
+      }
+    )
+    let statusUpdate = await fetch(`https://chuggachugga-choochoo.tech/api/status?id=${session_id}`)
+    simTemp = statusUpdate['engine_temperature']
+    simCoal = statusUpdate['fuel_weight']
+    simP1 = statusUpdate['cond_boiler_pressure']
+    simP2 = statusUpdate['boiler_engine_pressure']
+    simP3 = statusUpdate['engine_cond_pressure']
+    simSpeed = statusUpdate['speed']
+
+    actAddCoal = 0
+    actDumpCoal = false
+  }
+
+  StartGame()
 </script>
 
 <!-- <button>start</button> -->
