@@ -15,13 +15,8 @@
   // dialNumber = 0;
   // }
   // }, 100);
-  let coalArr = $state([
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-  ]);
+
+  let coalArr = $state(new Array(10));
   let coalVals_height = $state(0);
   let coalVals_width = $state(0);
   let coalVals_x = $state(0);
@@ -51,10 +46,11 @@
   let actEngineIntake = $state(0);
   let actFurnaceIntake = $state(0);
 
-
-  let session_id = $state()
+  let session_id = $state();
   async function StartGame() {
-    session_id = (await fetch("https://api.chuggachugga-choochoo.tech/start"))['id'];
+    session_id = (await fetch("https://api.chuggachugga-choochoo.tech/start"))[
+      "id"
+    ];
 
     setInterval(() => {
       ActObserve();
@@ -66,35 +62,37 @@
     let actRes = await fetch(
       `https://api.chuggachugga-choochoo.tech/actions?id=${session_id}`,
       {
-        method: 'POST',
+        method: "POST",
         headers: postHeaders,
         body: JSON.stringify({
-          'panel_open':actPanelOpen,
-          'add_coal': actAddCoal,
-          'dump_coal': actDumpCoal,
-          'add_water':0,
-          'drain_water':0,
-          'exhaut_openness':actExhaustOpen,
-          'gear':actGear,
-          'engine_intake':actEngineIntake,
-          'furnace_intake':actFurnaceIntake
+          panel_open: actPanelOpen,
+          add_coal: actAddCoal,
+          dump_coal: actDumpCoal,
+          add_water: 0,
+          drain_water: 0,
+          exhaut_openness: actExhaustOpen,
+          gear: actGear,
+          engine_intake: actEngineIntake,
+          furnace_intake: actFurnaceIntake,
         }),
-        redirect: 'follow'
+        redirect: "follow",
       }
-    )
-    let statusUpdate = await fetch(`https://api.chuggachugga-choochoo.tech/status?id=${session_id}`)
-    simTemp = statusUpdate['engine_temperature']
-    simCoal = statusUpdate['fuel_weight']
-    simP1 = statusUpdate['cond_boiler_pressure']
-    simP2 = statusUpdate['boiler_engine_pressure']
-    simP3 = statusUpdate['engine_cond_pressure']
-    simSpeed = statusUpdate['speed']
+    );
+    let statusUpdate = await fetch(
+      `https://api.chuggachugga-choochoo.tech/status?id=${session_id}`
+    );
+    simTemp = statusUpdate["engine_temperature"];
+    simCoal = statusUpdate["fuel_weight"];
+    simP1 = statusUpdate["cond_boiler_pressure"];
+    simP2 = statusUpdate["boiler_engine_pressure"];
+    simP3 = statusUpdate["engine_cond_pressure"];
+    simSpeed = statusUpdate["speed"];
 
-    actAddCoal = 0
-    actDumpCoal = false
+    actAddCoal = 0;
+    actDumpCoal = false;
   }
 
-  StartGame()
+  StartGame();
 </script>
 
 <!-- <button>start</button> -->
@@ -130,30 +128,19 @@
   <Gearbox size="100" bind:val={actGear}></Gearbox>
 </div>
 <!-- <Coal bind:x={} /> -->
+
 {#each coalArr as coalpc}
   <Coal
-    onmouseup={() => {
-      for (let i = 0; i < coalArr.length; i++) {
-        //check if the coal is in the hole
-        //check for overlap
-        //if overlap, remove the coal from the array
-        //and add to the fire
-        let coal = coalArr[i];
-        // let hole = holeElm.getBoundingClientRect();
-        let tolerance = 10;
-        if (
-          coal.x > coalVals_x - tolerance &&
-          coal.x < coalVals_x + coalVals_width + tolerance &&
-          coal.y > coalVals_y - tolerance &&
-          coal.y < coalVals_y + coalVals_height + tolerance
-        ) {
-          coalArr.splice(i, 1);
-          // holeElm.appendChild(coal);
-        }
-      }
+    addCoal={() => {
+      actAddCoal++;
     }}
-    bind:x={coalpc.x}
-    bind:y={coalpc.y}
+    bind:actPanelOpen
+    furnace_pos={{
+      x: coalVals_x,
+      y: coalVals_y,
+      width: coalVals_width,
+      height: coalVals_height,
+    }}
   />
 {/each}
 <BigBurny
