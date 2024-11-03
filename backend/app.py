@@ -3,40 +3,88 @@ from threading import Thread
 import time
 from sim import TrainInfo, TrainSim
 import pprint
+import json
+from loguru import logger
+import uuid
+
 app = Flask(__name__)
 
-# Initialize your TrainInfo and TrainSim instances
-train_info = TrainInfo()  # Assuming default values
-train_sim = TrainSim(train_data=train_info, timestep=1)
-
 # A variable to control the simulation loop
-running = True
+simulations = {} # {id: {"simulation": Thread, "last_update": time.time(), "running": True}}
+inc = 0
 
-def run_simulation():
-    while running:
-        metrics = train_sim.step()  # Perform a simulation step
-        pprint.pp(metrics)
-        time.sleep(train_sim.timestep)  # Sleep for the timestep duration
+def run_simulation(id):
+    global simulations
+    logger.debug(f"Running {id} from thread {simulations}")
+    sim = simulations[id]
+    while sim["running"]:
+        metrics = sim["train_sim"].step()  # Perform a simulation step
+        logger.info(json.dumps({"id":id,"metrics":metrics}, indent=2))
+        time.sleep(sim["train_sim"].timestep)  # Sleep for the timestep duration
 
 @app.route('/status', methods=['GET'])
 def get_status():
     """Endpoint to get the current simulation state."""
-    return jsonify(train_sim.step())  # This will return the latest state
+    id = request.args.get('id')
+    return jsonify(simulations[id]["train_sim"].step())  # This will return the latest state
 
 @app.route('/actions', methods=['POST'])
 def perform_actions():
     """Endpoint to submit actions to the simulation."""
+    id = request.args.get('id')
     action_data = request.json
-    train_sim.actions(action_data)  # Perform actions based on the submitted data
+    simulations[id]["train_sim"].actions(action_data)  # Perform actions based on the submitted data
+    simulations[id]["last_update"] = time.time()
     return jsonify({"message": "Actions applied."})
+
+
+# kill after 5 minutes 
+@app.route('/start', methods=['GET'])
+def start_session():
+    """Start the session for a user"""
+    global simulations, inc
+    # id = str(uuid.uuid4())
+    id = str(inc)
+
+    # Initialize your TrainInfo and TrainSim instances
+    train_info = TrainInfo()
+    train_sim = TrainSim(train_data=train_info, timestep=1) 
+    
+    simulations[id] = { "train_info": train_info,  # Assuming default values
+                        "train_sim": train_sim,
+                        "last_update": time.time(), 
+                        "running": True
+                    }
+    thread = Thread(target=run_simulation, args=[id])
+    thread.start()  # Start the thread
+
+    simulations[id]["simulation"] = thread
+
+    inc += 1
+    return jsonify({"id": id})
+
+
+@app.route('/stop', methods=['GET'])
+def stop_session():
+    """Stop the session for a user"""
+    global simulations
+    id = request.args.get('id')
+    print(f"Stopping {id}")
+    simulations[id]["running"] = False
+    simulations[id]["simulation"].join()
+    del simulations[id]
+
+    return jsonify({"message": "Session stopped"})
+
 
 if __name__ == '__main__':
     # Start the simulation in a separate thread
-    simulation_thread = Thread(target=run_simulation)
-    simulation_thread.start()
+    # simulation_thread = Thread(target=run_simulation)
+    # simulation_thread.start()
     
     try:
         app.run(port=5000)  # Run the Flask app
     finally:
-        running = False  # Stop the simulation loop on exit
-        simulation_thread.join()  # Wait for the simulation thread to finish
+        for x in simulations:
+            simulations[x]["running"] = False
+            simulations[x]["simulation"].join()
