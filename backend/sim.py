@@ -154,6 +154,7 @@ class TrainSim():
             'boiler_engine_pressure': float(pressure_boiler_to_engine),
             'engine_cond_pressure': float(pressure_engine_to_cond),
             'speed': float(self.speed_train),
+            'speed_target':float(self.speed_target),
             'fuel_weight': float(self.furnace_coal_kg)
         }
         

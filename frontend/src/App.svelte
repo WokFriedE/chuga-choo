@@ -54,7 +54,9 @@
 
   let session_id = $state()
   async function StartGame() {
-    session_id = (await fetch("https://api.chuggachugga-choochoo.tech/start"))['id'];
+    let startRes = await (await fetch("https://api.chuggachugga-choochoo.tech/start")).json();
+    console.log(startRes)
+    session_id = startRes['id']
 
     setInterval(() => {
       ActObserve();
@@ -82,7 +84,7 @@
         redirect: 'follow'
       }
     )
-    let statusUpdate = await fetch(`https://api.chuggachugga-choochoo.tech/status?id=${session_id}`)
+    let statusUpdate = await (await fetch(`https://api.chuggachugga-choochoo.tech/status?id=${session_id}`)).json()
     simTemp = statusUpdate['engine_temperature']
     simCoal = statusUpdate['fuel_weight']
     simP1 = statusUpdate['cond_boiler_pressure']
