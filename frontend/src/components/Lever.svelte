@@ -60,7 +60,7 @@
   function close() {
     SpringStore.update((val) => {
       if (val > 0) {
-        console.log(val);
+        // console.log(val);
 
         return val - 1;
       }

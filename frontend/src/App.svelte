@@ -10,6 +10,7 @@
   import LogDial from "./components/LogDial.svelte";
   import Gearbox from "./components/Gearbox.svelte";
   import Label from "./components/Label.svelte";
+  import Help from "./components/Help.svelte";
   // setInterval(() => {
   // dialNumber++;
   // if (dialNumber > 100) {
@@ -99,6 +100,10 @@
   }
 
   StartGame();
+  // set a css variable globally
+  $effect(() => {
+    document.documentElement.style.setProperty("--shake-speed", simSpeed);
+  });
 </script>
 
 <svelte:window
@@ -180,6 +185,12 @@
   bind:y={coalVals_y}
   bind:hasGlass={actPanelOpen}
 />
+<div style="position: absolute; left: 250px; top: 800px">
+  <Label label="Furnace" />
+</div>
+<div class="help">
+  <Help />
+</div>
 
 <!-- <div class="light1">
   <Light />
@@ -189,6 +200,11 @@
 </div> -->
 
 <style>
+  .help {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+  }
   /* div {  
     display: flex;
     justify-content: center;
@@ -232,7 +248,8 @@
     background-attachment: fixed;
     background-size: cover;
     background-repeat: no-repeat;
-    animation: verticalshake 2s infinite;
+    /* animation: verticalshake calc(var(--shake-speed) / 100s) infinite; */
+    animation: verticalshake 1s infinite linear;
   }
   @keyframes verticalshake {
     0% {
@@ -241,7 +258,7 @@
     }
     50% {
       background-position: 0px 2px;
-      transform: translate(0px, 2px);
+      transform: translate(0px, calc(var(--shake-speed) * 2px));
     }
     100% {
       background-position: 0px 0px;
