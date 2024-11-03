@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Simulation Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .metrics {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .action-form {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input[type="number"], input[type="checkbox"], select {
+            width: 100px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Train Simulation Dashboard</h1>
+    <div id="metrics" class="metrics">
+        <h2>Current Metrics</h2>
+        <pre id="metricsDisplay"></pre>
+    </div>
+    <div class="action-form">
+        <h2>Submit Actions</h2>
+        <label for="panel_open">Furnace Panel Open:</label>
+        <input type="checkbox" id="panel_open"><br>
+        
+        <label for="add_coal">Add Coal (kg):</label>
+        <input type="number" id="add_coal" placeholder="0"><br>
+        
+        <label for="dump_coal">Dump Coal:</label>
+        <input type="checkbox" id="dump_coal"><br>
+        
+        <label for="add_water">Add Water (kg):</label>
+        <input type="number" id="add_water" placeholder="0"><br>
+        
+        <label for="drain_water">Drain Water (kg):</label>
+        <input type="number" id="drain_water" placeholder="0"><br>
+        
+        <label for="exhaust_openness">Exhaust Openness (0-1):</label>
+        <input type="number" id="exhaust_openness" placeholder="0" min="0" max="1" step="0.1"><br>
+        
+        <label for="gear">Gear:</label>
+        <select id="gear">
+            <option value="-1">-1</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select><br>
+        
+        <label for="engine_intake">Engine Intake:</label>
+        <input type="number" id="engine_intake" placeholder="1" value="1"><br>
+        
+        <label for="furnace_intake">Furnace Intake:</label>
+        <input type="number" id="furnace_intake" placeholder="1" value="1"><br>
+        
+        <button onclick="submitActions()">Submit Actions</button>
+    </div>
+    <script>
+        async function fetchMetrics() {
+            const response = await fetch('/status');
+            const metrics = await response.json();
+            document.getElementById('metricsDisplay').innerText = JSON.stringify(metrics, null, 2);
+        }
+
+        async function submitActions() {
+            const actions = {
+                panel_open: document.getElementById('panel_open').checked,
+                add_coal: document.getElementById('add_coal').value || 0,
+                dump_coal: document.getElementById('dump_coal').checked,
+                add_water: document.getElementById('add_water').value || 0,
+                drain_water: document.getElementById('drain_water').value || 0,
+                exhaust_openness: document.getElementById('exhaust_openness').value || 0,
+                gear: document.getElementById('gear').value,
+                engine_intake: document.getElementById('engine_intake').value || 1,
+                furnace_intake: document.getElementById('furnace_intake').value || 1,
+            };
+
+            await fetch('/actions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(actions),
+            });
+
+            // Clear the input fields
+            document.getElementById('add_coal').value = '';
+            document.getElementById('dump_coal').checked = false;
+            document.getElementById('add_water').value = '';
+            document.getElementById('drain_water').value = '';
+            document.getElementById('exhaust_openness').value = '';
+            document.getElementById('gear').value = '0';
+            document.getElementById('engine_intake').value = '1';
+            document.getElementById('furnace_intake').value = '1';
+        }
+
+        // Update metrics every second
+        setInterval(fetchMetrics, 1000);
+    </script>
+</body>
+</html>
