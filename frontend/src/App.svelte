@@ -50,7 +50,7 @@
   let actDumpCoal = $state(false);
   let actPanelOpen = $state(false);
   let actExhaustOpen = $state(0);
-  let actGear = $state(0);
+  let actGear = $state(5);
   let actEngineIntake = $state(0);
   let actFurnaceIntake = $state(0);
 
