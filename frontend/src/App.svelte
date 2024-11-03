@@ -101,7 +101,7 @@
 </script>
 
 <svelte:window
-  on:click={() => {
+  on:click|once={() => {
     let audio = new Audio("/bgsnd.mp3");
     audio.play();
     audio.volume = 0.4;
@@ -113,7 +113,7 @@
         audio2.play();
         audio2.volume = 0.7;
       }
-    }, 10000);
+    }, 30000);
   }}
 />
 <!-- <button>start</button> -->
