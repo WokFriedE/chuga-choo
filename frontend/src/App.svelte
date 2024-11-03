@@ -9,6 +9,7 @@
   import Tv from "./components/TV.svelte";
   import LogDial from "./components/LogDial.svelte";
   import Gearbox from "./components/Gearbox.svelte";
+  import Label from "./components/Label.svelte";
   // setInterval(() => {
   // dialNumber++;
   // if (dialNumber > 100) {
@@ -141,9 +142,17 @@
 </div>
 <div class="crnk1">
   <Crank size={"1.5"} bind:val={actEngineIntake} />
+  <br />
+  <br />
+  <br />
+  <Label label="Engine Intake" />
 </div>
 <div class="crnk2">
   <Crank size={"1.5"} bind:val={actFurnaceIntake} />
+  <br />
+  <br />
+  <br />
+  <Label label="Furnace Intake" />
 </div>
 <div style="position: absolute; left:1300px; top:470px">
   <Gearbox size="100" bind:val={actGear}></Gearbox>
