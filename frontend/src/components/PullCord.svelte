@@ -5,8 +5,8 @@
 
   // Initialize spring with parameters for smooth return
   let verticalSpring = spring(0, {
-    stiffness: 0.1,   // Increased stiffness for a slightly stronger pull-back effect
-    damping: 0.3,     // Damping to control the bounciness on release
+    stiffness: 0.1, // Increased stiffness for a slightly stronger pull-back effect
+    damping: 0.3, // Damping to control the bounciness on release
   });
 
   function makeDraggable() {
@@ -25,6 +25,10 @@
 
       // Reset when mouse is released
       document.onmouseup = () => {
+        let audio = new Audio("/choochoo.mp3");
+
+        audio.play();
+
         document.onmousemove = null;
         document.onmouseup = null;
 
@@ -38,7 +42,7 @@
 <img
   src="/pull_cord.png"
   alt="lever"
-  height={`${size*3}px`}
+  height={`${size * 3}px`}
   bind:this={lever}
   on:load={makeDraggable}
   style:transform={`translateY(${$verticalSpring}px)`}

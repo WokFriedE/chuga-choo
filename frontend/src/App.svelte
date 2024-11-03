@@ -39,7 +39,7 @@
 
 <Dial size={200} bind:number={dialNumber} max={100} />
 <div class="lvr">
-  <Lever size="200" />
+  <Lever size="350" />
 </div>
 <div class="cord">
   <PullCord size="200" />
@@ -112,8 +112,8 @@
   }
   .lvr {
     position: absolute;
-    top: 13em;
-    left: 59em;
+    top: 10em;
+    left: 53em;
   }
   .tv {
     position: absolute;
@@ -124,7 +124,7 @@
   .light1 {
     position: absolute;
     top: 0em;
-    left:40em;
+    left: 40em;
     transform: rotate(180deg);
   }
   :global(body) {
