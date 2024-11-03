@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 from threading import Thread
 import time
 from sim import TrainInfo, TrainSim
@@ -8,7 +7,6 @@ import json
 from loguru import logger
 
 app = Flask(__name__)
-CORS(app)
 
 # A variable to control the simulation loop
 simulations = {} # {id: {"simulation": Thread, "last_update": time.time(), "running": True}}
