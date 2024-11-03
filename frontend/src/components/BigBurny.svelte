@@ -1,11 +1,12 @@
 <script>
-  let hasGlass = $state(false);
   let {
+    hasGlass = $bindable()
     width = $bindable(),
     height = $bindable(),
     x = $bindable(),
     y = $bindable(),
   } = $props();
+  hasGlass = false;
   let elmrect = $state({});
   $effect(() => {
     width = elmrect?.getBoundingClientRect().width;

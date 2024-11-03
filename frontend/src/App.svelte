@@ -32,6 +32,25 @@
   $effect(() => {
     dialNumber = CrankVal;
   });
+
+  let simTemp = $state(20)
+  // Cond-Boiler Pressure
+  let simP1 = $state(0)
+  // Boiler-Engine Pressure
+  let simP2 = $state(0)
+  // Engine-Cond Pressure
+  let simP3 = $state(0)
+  let simSpeed = $state(0)
+  let simCoal = $state(0)
+  
+  let actAddCoal = $state(0)
+  let actDumpCoal = $state(false)
+  let actPanelOpen = $state(false)
+  let actExhaustOpen = $state(0)
+  let actGear = $state(0)
+  let actEngineIntake = $state(0)
+  let actFurnaceIntake = $state(0)
+
   async function StartGame() {
     let uuid = await fetch("https://chuggachugga-choochoo.tech/api/start");
   }
@@ -40,26 +59,26 @@
 <!-- <button>start</button> -->
 <div style="display: flex; flex-direction: column;">
   <div style="display: flex; flex-direction: row; align-items: center;">
-    <Dial size={200} bind:number={dialNumber} max={360} label="Speed" />
-    <Dial size={150} bind:number={dialNumber} max={360} label="Temp."/>
+    <Dial size={200} bind:number={simSpeed} max={200} label="Speed" />
+    <Dial size={150} bind:number={simTemp} max={400} label="Temp."/>
   </div>
   <div style="display: flex; flex-direction: row;">
-    <LogDial size={75} bind:number={dialNumber} max={360} label="Pressure 1" />
-    <LogDial size={75} bind:number={dialNumber} max={360} label="Pressure 2"/>
-    <LogDial size={75} bind:number={dialNumber} max={360} label="Pressure 3"/>
+    <LogDial size={75} bind:number={simP1} max={70000000} label="Pressure 1" />
+    <LogDial size={75} bind:number={simP2} max={70000000} label="Pressure 2"/>
+    <LogDial size={75} bind:number={simP3} max={70000000} label="Pressure 3"/>
   </div>
 </div>
 <div class="lvr">
   <Lever size="350" />
 </div>
 <div class="cord">
-  <PullCord size="200" />
+  <PullCord size="200" bind:val={actExhaustOpen}/>
 </div>
 <div class="crnk1">
-  <Crank size={"1.5"} bind:val={CrankVal} />
+  <Crank size={"1.5"} bind:val={actEngineIntake} />
 </div>
 <div class="crnk2">
-  <Crank size={"1.5"} bind:val={CrankVal} />
+  <Crank size={"1.5"} bind:val={actFurnaceIntake} />
 </div>
 <div style="position: absolute; left:1300px; top:470px">
   <Gearbox size="100" ></Gearbox>
