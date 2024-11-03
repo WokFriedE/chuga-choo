@@ -34,6 +34,18 @@
 </button>
 
 <style>
+  .square {
+    background: url("/black-cast-iron-background.png");
+    width: 40em;
+    height: 20em;
+    position: absolute;
+    left: 100px;
+    top: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+  }
   .glass {
     width: 10em;
     height: 10em;
@@ -45,9 +57,18 @@
     justify-content: center;
     align-items: center;
   }
-  .fire {
+  .hole {
     width: 8em;
     height: 8em;
+    border-radius: 50%;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .fire {
+    width: 6em;
+    height: 6em;
     border-radius: 50%;
     filter: blur(1em);
     background: radial-gradient(
@@ -73,18 +94,5 @@
       opacity: 0.8;
       scale: 1.1;
     }
-  }
-  .square {
-    background: url("/plate.jpg");
-    width: 15em;
-    height: 15em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: none;
-  }
-  .hole {
-    background-color: #000;
-    border-radius: 50%;
   }
 </style>
