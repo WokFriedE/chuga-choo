@@ -1,5 +1,5 @@
 <script>
-  let { number = $bindable(), max, size } = $props();
+  let { number = $bindable(), max, size, label } = $props();
   let pin, dial;
   let angle = $state(0);
   $effect(() => {
@@ -33,6 +33,7 @@
     bind:this={pin}
     style={`transform: rotate(${180 - angle + 90}deg);`}
   ></div>
+  <p style={`font-size: ${size / 10}px; top: 48%;`}>{label}</p>
 </div>
 
 <style>

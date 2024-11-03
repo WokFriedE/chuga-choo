@@ -40,13 +40,13 @@
 <!-- <button>start</button> -->
 <div style="display: flex; flex-direction: column;">
   <div style="display: flex; flex-direction: row; align-items: center;">
-    <Dial size={200} bind:number={dialNumber} max={360} />
-    <Dial size={150} bind:number={dialNumber} max={360} />
+    <Dial size={200} bind:number={dialNumber} max={360} label="Speed" />
+    <Dial size={150} bind:number={dialNumber} max={360} label="Temp."/>
   </div>
   <div style="display: flex; flex-direction: row;">
-    <LogDial size={75} bind:number={dialNumber} max={360} />
-    <LogDial size={75} bind:number={dialNumber} max={360} />
-    <LogDial size={75} bind:number={dialNumber} max={360} />
+    <LogDial size={75} bind:number={dialNumber} max={360} label="Pressure 1" />
+    <LogDial size={75} bind:number={dialNumber} max={360} label="Pressure 2"/>
+    <LogDial size={75} bind:number={dialNumber} max={360} label="Pressure 3"/>
   </div>
 </div>
 <div class="lvr">
