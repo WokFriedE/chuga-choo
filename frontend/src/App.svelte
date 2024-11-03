@@ -5,6 +5,7 @@
   import BigBurny from "./components/BigBurny.svelte";
   import Lever from "./components/Lever.svelte";
   import Light from "./components/Light.svelte";
+  import PullCord from "./components/PullCord.svelte";
   // setInterval(() => {
   // dialNumber++;
   // if (dialNumber > 100) {
@@ -38,6 +39,9 @@
 <Dial size={200} bind:number={dialNumber} max={100} />
 <div class="lvr">
   <Lever size="200" />
+</div>
+<div class="cord">
+  <PullCord size="200" />
 </div>
 <div class="crnk1">
   <Crank size={"1.5"} bind:val={CrankVal} />
@@ -94,6 +98,11 @@
     position: absolute;
     left: 80em;
     top: 20em;
+  }
+  .cord {
+    position: absolute;
+    top: -13em;
+    left: 85em;
   }
   .lvr {
     position: absolute;

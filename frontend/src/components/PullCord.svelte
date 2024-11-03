@@ -36,7 +36,6 @@
 </script>
 
 <img
-  style:width={`${size*3}px`}
   src="/pull_cord.png"
   alt="lever"
   height={`${size*3}px`}
