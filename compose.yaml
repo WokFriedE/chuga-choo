@@ -11,7 +11,5 @@ services:
             - backend
     nginx: 
         build: ./infra
-        ports:
-            - "80:80"
         depends_on:
             - web
