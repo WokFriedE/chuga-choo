@@ -7,6 +7,8 @@
   import Light from "./components/Light.svelte";
   import PullCord from "./components/PullCord.svelte";
   import Tv from "./components/TV.svelte";
+  import LogDial from "./components/LogDial.svelte";
+  import Gearbox from "./components/Gearbox.svelte";
   // setInterval(() => {
   // dialNumber++;
   // if (dialNumber > 100) {
@@ -36,8 +38,17 @@
 </script>
 
 <!-- <button>start</button> -->
-
-<Dial size={200} bind:number={dialNumber} max={100} />
+<div style="display: flex; flex-direction: column;">
+  <div style="display: flex; flex-direction: row; align-items: center;">
+    <Dial size={200} bind:number={dialNumber} max={100} />
+    <Dial size={150} bind:number={dialNumber} max={100} />
+  </div>
+  <div style="display: flex; flex-direction: row;">
+    <LogDial size={75} bind:number={dialNumber} max={100} />
+    <LogDial size={75} bind:number={dialNumber} max={100} />
+    <LogDial size={75} bind:number={dialNumber} max={100} />
+  </div>
+</div>
 <div class="lvr">
   <Lever size="350" />
 </div>
@@ -49,6 +60,9 @@
 </div>
 <div class="crnk2">
   <Crank size={"1.5"} bind:val={CrankVal} />
+</div>
+<div>
+  <Gearbox size="350"></Gearbox>
 </div>
 <!-- <Coal bind:x={} /> -->
 {#each coalArr as coalpc}
@@ -83,12 +97,12 @@
   bind:x={coalVals_x}
   bind:y={coalVals_y}
 />
-<div class="light1">
+<!-- <div class="light1">
   <Light />
-</div>
-<div class="tv">
+</div> -->
+<!-- <div class="tv">
   <Tv />
-</div>
+</div> -->
 
 <style>
   /* div {  

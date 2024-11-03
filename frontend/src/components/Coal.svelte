@@ -6,8 +6,12 @@
     y = $bindable(),
     onmouseup,
   } = $props();
+  
+  // Set the initial position at the bottom left, adjusted up by half the image height
   let left = $state(0);
-  let top = $state(0);
+  let imageHeight = 100; // Adjust this to your actual image height
+  let top = $state(window.innerHeight - 3*imageHeight); // Move up by half the height
+
   function onMouseDown() {
     moving = true;
     holdingCoal = true;
@@ -33,9 +37,8 @@
 <img
   src="/Coal.png"
   alt="Coal"
-  style:top={top + "px"}
+  style="top: {top}px; left: {left}px;"
   draggable="false"
-  style:left={left + "px"}
   class="draggable"
   on:mousedown={onMouseDown}
 />
