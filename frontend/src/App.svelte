@@ -201,7 +201,7 @@
 {#each coalArr as coalpc}
   <Coal
     addCoal={() => {
-      actAddCoal++;
+      actAddCoal += 10;
       console.log(actAddCoal);
     }}
     bind:actPanelOpen

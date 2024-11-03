@@ -63,7 +63,7 @@ class TrainSim():
         self.train_data: TrainInfo = train_data
         self.timestep = timestep
         # Density of water is 1 kg / m^3
-        self.kg_cond_to_boiler = 20000 * self.train_data.len_cond_to_boiler * (np.pi * (self.train_data.rad_cond_to_boiler ** 2))
+        self.kg_cond_to_boiler = 10000 * self.train_data.len_cond_to_boiler * (np.pi * (self.train_data.rad_cond_to_boiler ** 2))
     
     @property
     def coal_volume(self):
@@ -73,7 +73,7 @@ class TrainSim():
         return self.furnace_air_kg / 1.225
     
     def fuel_used_kg(self):
-        air_mass_flow = min(self.train_data.boiler_volume * 1.225, self.furnace_air_kg) # kg / s
+        air_mass_flow = min((self.train_data.boiler_volume - self.coal_volume) * 1.225, self.furnace_air_kg) # kg / s
         coal_mass_flow = air_mass_flow / self.train_data.air_fuel_ratio # kg / s
         return max(min(coal_mass_flow*self.timestep, self.furnace_coal_kg), 0)
     
