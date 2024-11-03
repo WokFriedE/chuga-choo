@@ -1,6 +1,6 @@
 <script>
-  import { spring } from "svelte/motion";
-  let { size } = $props();
+  import { spring} from "svelte/motion";
+  let { size, val = $bindable() } = $props();
   let lever;
 
   // Initialize spring with parameters for smooth return
@@ -21,6 +21,7 @@
       document.onmousemove = (event) => {
         let displacement = event.clientY - initialY;
         verticalSpring.set(Math.min(displacement, 200));
+        val = Math.min(Math.max(displacement, 0), 200) / 200
       };
 
       // Reset when mouse is released

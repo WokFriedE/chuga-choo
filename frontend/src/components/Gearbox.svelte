@@ -2,7 +2,7 @@
   import { spring } from "svelte/motion";
   import { writable } from "svelte/store";
 
-  let { size } = $props();
+  let { size, val = $bindable() } = $props();
   let lever;
   let activeTick = writable(0); // Use writable store for reactive state
 
@@ -63,6 +63,17 @@
         verticalSpring.set(closestTick);
         currentY = closestTick; // Maintain the snapped position
         activeTick.set(ticks.indexOf(closestTick));
+
+        let activeLabel = tickLabels[ticks.indexOf(closestTick)]
+        if (activeLabel === "BRAKE") {
+          val = 0
+        }
+        else if (activeLabel === "REVERSE") {
+          val = -1
+        }
+        else {
+          val = parseInt(activeLabel)
+        }
       };
     };
   }
