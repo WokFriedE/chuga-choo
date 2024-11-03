@@ -156,8 +156,8 @@
       transform: translate(0px, 0px);
     }
     50% {
-      background-position: 0px 2px;
-      transform: translate(0px, 2px);
+      background-position: 0px -2px;
+      transform: translate(0px, -2px);
     }
     100% {
       background-position: 0px 0px;
