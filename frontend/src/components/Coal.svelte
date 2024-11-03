@@ -8,9 +8,9 @@
   } = $props();
   let hidden = $state(false);
   // Set the initial position at the bottom left, adjusted up by half the image height
-  let left = $state(window.innerWidth * Math.random()); // Adjust this to your actual image width
+  let left = $state(0 + 100 * Math.random()); // Adjust this to your actual image width
   let imageHeight = 100; // Adjust this to your actual image height
-  let top = $state(window.innerHeight * Math.random()); // Adjust this to your actual image height
+  let top = $state(window.innerHeight - 150 - 150 * Math.random()); // Adjust this to your actual image height
 
   function onMouseDown() {
     moving = true;
@@ -62,8 +62,12 @@
     user-select: none;
     object-fit: contain;
     border-radius: 50%;
-    border: 2px solid rgb(255, 255, 255);
-    background-color: #ffffffac;
+    border: 2px solid rgb(236, 217, 45);
+    background-color: #ffffff8d;
     z-index: 3;
+  }
+  img:hover {
+    cursor: pointer;
+    border: 2px solid green;
   }
 </style>
