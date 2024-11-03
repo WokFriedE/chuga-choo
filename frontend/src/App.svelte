@@ -81,7 +81,7 @@
   <Crank size={"1.5"} bind:val={actFurnaceIntake} />
 </div>
 <div style="position: absolute; left:1300px; top:470px">
-  <Gearbox size="100" ></Gearbox>
+  <Gearbox size="100" bind:val={actGear}></Gearbox>
 </div>
 <!-- <Coal bind:x={} /> -->
 {#each coalArr as coalpc}
@@ -115,6 +115,7 @@
   bind:height={coalVals_height}
   bind:x={coalVals_x}
   bind:y={coalVals_y}
+  bind:hasGlass={actPanelOpen}
 />
 <!-- <div class="light1">
   <Light />
